@@ -1,0 +1,1 @@
+git clone url://to/source/repository --recursive --shallow-submodules
