@@ -187,6 +187,11 @@ double Request::GetVal(std::string str_value) const {
     return stod(str_value);
 }
 
+template<>
+bool Request::GetVal(std::string str_value) const {
+    return stoi(str_value);
+}
+
 // time format should be %Y-%m-%d or %Y-%m-%d-%H-%M-%S
 template<>
 time_t Request::GetVal(std::string str_value) const {
