@@ -196,14 +196,14 @@ void Server::SetLogger(std::shared_ptr<spdlog::logger> logger) {
 }
 #endif //USE_SPDLOG
 
-void Server::RequestHandler(evhttp_request* request, void* webserver_ptr) {
-    auto webserver = static_cast<Server*>(webserver_ptr);
-    Request web_request(request);
-    LOG_DEBUG(webserver, "new request[{}] for {} from {}:{}", (int)web_request.Method(),
-        web_request.Url(), web_request.ClientIp(), web_request.ClientPort());
-	auto web_response = webserver->RequestHandler(web_request);
-	if (web_response.Send() == 0)
-		LOG_DEBUG(webserver, "response[{}] sent for {}", web_response.GetStatusCode(), web_request.Url());
+void Server::RequestHandler(evhttp_request* request, void* server_ptr) {
+    auto server = static_cast<Server*>(server_ptr);
+    Request http_request(request);
+    LOG_DEBUG(server, "new request[{}] for {} from {}:{}", (int)http_request.Method(),
+        http_request.Url(), http_request.ClientIp(), http_request.ClientPort());
+	auto http_response = server->RequestHandler(http_request);
+	if (http_response.Send() == 0)
+		LOG_DEBUG(server, "response[{}] sent for {}", http_response.GetStatusCode(), http_request.Url());
 }
 
 Response Server::RequestHandler(Request& request) {
