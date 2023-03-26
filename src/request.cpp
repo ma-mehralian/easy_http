@@ -150,6 +150,77 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
     }
 }
 
+struct chunk_req_state {
+    evhttp_request* req;
+    event* timer;
+    std::function<bool(std::string&)> get_chunk;
+    int i;
+};
+
+static void
+schedule_trickle(struct chunk_req_state* state, int ms) {
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = ms * 30;
+    evtimer_add(state->timer, &tv);
+}
+
+static void
+http_chunked_trickle_cb(evutil_socket_t fd, short events, void* arg) {
+    auto state = static_cast<chunk_req_state*>(arg);
+    string chunk;
+    if (state->get_chunk(chunk) && evhttp_request_get_connection(state->req)) {
+        state->i++;
+        struct evbuffer* evb = evbuffer_new();
+        evbuffer_add(evb, chunk.c_str(), chunk.length());
+        evhttp_send_reply_chunk(state->req, evb);
+        evbuffer_free(evb);
+        schedule_trickle(state, 1000);
+    }
+    else {
+        evhttp_send_reply_end(state->req);
+        event_free(state->timer);
+        free(state);
+    }
+}
+
+void Request::Reply(int status_code, const HeaderList &headers) {
+    //--- add headers
+    HeaderList default_headers = {
+        {"Access-Control-Allow-Origin", "*"},
+        {"Access-Control-Allow-Credentials", "true"},
+        {"Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"},
+        {"Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, X-Auth-Token, "
+            "Content-Type, Access-Control-Allow-Headers, "
+            "Access-Control-Request-Method, Access-Control-Request-Headers"}
+    };
+    for (auto& h : default_headers)
+        evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
+            h.first.c_str(), h.second.c_str());
+
+    for (auto& h : headers)
+        evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
+            h.first.c_str(), h.second.c_str());
+
+    if (!is_chunked_)
+        evhttp_send_reply(evrequest_, status_code, "ok", evhttp_request_get_output_buffer(evrequest_));
+    else {
+        //https://gist.github.com/rgl/291085
+        auto state = new chunk_req_state();
+        state->req = evrequest_;
+        state->timer = evtimer_new(evhttp_connection_get_base(evhttp_request_get_connection(evrequest_)),
+            http_chunked_trickle_cb, state);
+        state->get_chunk = chunk_callback_;
+        evhttp_send_reply_start(evrequest_, status_code, "OK");
+        schedule_trickle(state, 0);
+    }
+}
+
+void Request::SetChunkCallback(std::function<bool(std::string&)> func) {
+    chunk_callback_ = func;
+    is_chunked_ = true;
+}
+
 std::string Request::GetContent() const {
     string content;
     auto buffer = evhttp_request_get_input_buffer(evrequest_);

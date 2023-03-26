@@ -8,6 +8,7 @@
 #include <nlohmann/json.hpp>
 #endif // USE_JSON
 
+#include <functional>
 #include <regex>
 #include <type_traits>
 
@@ -16,6 +17,12 @@ struct evhttp_request;
 class Request {
 public:
 	enum class RequestMethod { GET, POST, HEAD, PUT, DELETE, OPTIONS, TRACE, CONNECT, PATCH };
+	typedef std::map<std::string, std::string> HeaderList;
+
+	//! reply received request
+	void Reply(int status_code, const HeaderList &headers);
+
+	void SetChunkCallback(std::function<bool(std::string&)> func);
 
 #ifdef USE_JSON
 	//! Get the JSON payload for the request.
@@ -96,6 +103,9 @@ private:
 	std::string client_ip_;
 	int client_port_;
 	std::map<std::string, std::string> headers_;
+	//-- chunck
+	bool is_chunked_ = false;
+	std::function<bool(std::string&)> chunk_callback_ = nullptr;
 
 
 	//! check if key exist in list and is not empty

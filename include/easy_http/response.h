@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <functional>
 
 //! https://github.com/symfony/http-foundation/blob/6.2/Response.php
 class Response {
@@ -46,8 +45,6 @@ public:
 
 	void SetFilePath(std::string path);
 
-	void SetChunkCallback(std::function<bool(std::string&)> func);
-
 	int Send();
 
 protected:
@@ -57,10 +54,6 @@ protected:
 	int status_code_;
 	std::string charset_;
 	bool is_file_ = false;
-	//-- chunck
-	bool is_chunked_ = false;
-	std::function<bool(std::string&)> chunk_callback_ = nullptr;
-
 };
 
 #endif // !_HTTP_RESPONSE_H_
