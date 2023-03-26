@@ -19,7 +19,6 @@ public:
 	~Response();
 
 	void SetContent(std::string content);
-	std::string GetContent() const;
 
 	//void PushHeader(std::string key, std::string value);
 	const HeaderList& GetHeaders() const;

@@ -56,10 +56,6 @@ void Response::SetContent(std::string content) {
 		throw std::runtime_error("Failed to create add content to response buffer");
 }
 
-std::string Response::GetContent() const {
-	return "";
-}
-
 const Response::HeaderList& Response::GetHeaders() const {
 	return headers_;
 }
