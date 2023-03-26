@@ -22,7 +22,7 @@ public:
 	nlohmann::json Json() const;
 #endif // USE_JSON
 
-	std::string GetContent() const { return body_; }
+	std::string GetContent() const;
 
 	//!Retrieve a query string item from the request.
 	template <typename T>
@@ -89,7 +89,6 @@ private:
 	std::string client_ip_;
 	int client_port_;
 	std::string host_;
-	std::string body_;
 	std::map<std::string, std::string> headers_;
 
 

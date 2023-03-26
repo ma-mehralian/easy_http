@@ -133,16 +133,19 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
         headers_[h_keyval->key] = h_keyval->value;
         h_keyval = h_keyval->next.tqe_next;
     }
-
-    // read request body
-    // note: unique_ptr<evbuffer, EventFree> request_buffer will crash after evbuffer_free
-    auto request_buffer = evhttp_request_get_input_buffer(request);
-    auto req_body_len = evbuffer_get_length(request_buffer);
-    if (req_body_len > 0) {
-        body_.resize(req_body_len);
-        evbuffer_copyout(request_buffer, (void*)body_.data(), req_body_len);
-    }
 }
+
+std::string Request::GetContent() const {
+    string content;
+    auto buffer = evhttp_request_get_input_buffer(evrequest_);
+    auto req_body_len = evbuffer_get_length(buffer);
+    if (req_body_len > 0) {
+        content.resize(req_body_len);
+        evbuffer_copyout(buffer, (void*)content.data(), req_body_len);
+    }
+    return content;
+}
+
 
 #ifdef USE_JSON
 nlohmann::json Request::Json() const {
