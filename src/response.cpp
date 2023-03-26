@@ -3,25 +3,8 @@
 #include <event2/http.h>
 #include <event2/keyvalq_struct.h>
 #include <event2/event.h>
-#include <filesystem>
-#include "utils.h"
 
 using namespace std;
-
-const std::map<string, string> content_type_table = {
-	{ "", "text/html" },
-	{ ".html", "text/html" },
-	{ ".htm", "text/htm" },
-	{ ".txt", "text/plain" },
-	{ ".css", "text/css" },
-	{ ".gif", "image/gif" },
-	{ ".jpg", "image/jpeg" },
-	{ ".jpeg", "image/jpeg" },
-	{ ".png", "image/png" },
-	{ ".js", "text/javascript" },
-	{ ".pdf", "application/pdf" },
-	{ ".ps", "application/postscript" },
-};
 
 Response::Response(Request& request, int status, HeaderList headers)
 	: request_(request), status_code_(status), headers_(headers)
@@ -59,26 +42,7 @@ const Response::HeaderList& Response::GetHeaders() const {
 
 void Response::SetFilePath(std::string path) {
 	is_file_ = true;
-	int64_t size;
-	int fd;
-	if (!path.empty() && (fd = open_file(path, size)) > 0) {
-		string ext = filesystem::path(path).extension().string();
-		auto mime = content_type_table.find(ext);
-		if (mime != content_type_table.end()) {
-			evhttp_add_header(evhttp_request_get_output_headers(request_.evrequest_),
-				"Content-type", mime->second.c_str());
-		}
-#ifdef NDEBUG
-		//evbuffer_set_flags(response_buffer.get(), EVBUFFER_FLAG_DRAINS_TO_FD);
-		int r = evbuffer_add_file(evhttp_request_get_output_buffer(request_.evrequest_), fd, 0, size);
-		if (r != 0)
-			throw std::runtime_error("Cannot add file content to buffer");
-#else
-		#warning this line will not work with release binary!
-#endif
-	}
-	else
-		throw std::runtime_error("Cannot open file");
+	request_.SetFileContent(path);
 }
 
 void Response::SetChunkCallback(std::function<bool(std::string&)> func) { 

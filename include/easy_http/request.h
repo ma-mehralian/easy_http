@@ -24,7 +24,11 @@ public:
 
 	std::string GetContent() const;
 
+	// set string content
 	void SetContent(std::string content);
+
+	// set file content
+	void SetFileContent(std::string file_path);
 
 	//!Retrieve a query string item from the request.
 	template <typename T>

@@ -6,6 +6,7 @@
 #include <regex>
 #include <algorithm>
 #include <sstream>
+#include <filesystem>
 #include "utils.h"
 
 using namespace std;
@@ -17,6 +18,21 @@ struct EventFree {
 };
 template<typename T>
 using event_ptr = std::unique_ptr<T, EventFree>;
+
+const std::map<string, string> content_type_table = {
+    { "", "text/html" },
+    { ".html", "text/html" },
+    { ".htm", "text/htm" },
+    { ".txt", "text/plain" },
+    { ".css", "text/css" },
+    { ".gif", "image/gif" },
+    { ".jpg", "image/jpeg" },
+    { ".jpeg", "image/jpeg" },
+    { ".png", "image/png" },
+    { ".js", "text/javascript" },
+    { ".pdf", "application/pdf" },
+    { ".ps", "application/postscript" },
+};
 
 Request::Request(evhttp_request* request) : evrequest_(request) {
 #pragma push_macro("DELETE")
@@ -150,6 +166,30 @@ void Request::SetContent(std::string content) {
     int r = evbuffer_add(buffer, content.c_str(), content.length());
     if (r != 0)
         throw std::runtime_error("Failed to create add content to response buffer");
+}
+
+// set file content
+void Request::SetFileContent(std::string file_path) {
+    int64_t size;
+    int fd;
+    if (!file_path.empty() && (fd = open_file(file_path, size)) > 0) {
+        string ext = filesystem::path(file_path).extension().string();
+        auto mime = content_type_table.find(ext);
+        if (mime != content_type_table.end()) {
+            evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
+                "Content-type", mime->second.c_str());
+        }
+#ifdef NDEBUG
+        //evbuffer_set_flags(response_buffer.get(), EVBUFFER_FLAG_DRAINS_TO_FD);
+        int r = evbuffer_add_file(evhttp_request_get_output_buffer(evrequest_), fd, 0, size);
+        if (r != 0)
+            throw std::runtime_error("Cannot add file content to buffer");
+#else
+        //#warning this line will not work with release binary!
+#endif
+    }
+    else
+        throw std::runtime_error("Cannot open file");
 }
 
 #ifdef USE_JSON
