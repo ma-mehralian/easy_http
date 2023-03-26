@@ -24,6 +24,8 @@ public:
 
 	std::string GetContent() const;
 
+	void SetContent(std::string content);
+
 	//!Retrieve a query string item from the request.
 	template <typename T>
 	T Query(std::string key, T default_value = T()) const { return GetVal<T>(uri_.query, key, default_value); }

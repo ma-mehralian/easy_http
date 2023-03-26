@@ -146,6 +146,12 @@ std::string Request::GetContent() const {
     return content;
 }
 
+void Request::SetContent(std::string content) {
+    auto buffer = evhttp_request_get_output_buffer(evrequest_);
+    int r = evbuffer_add(buffer, content.c_str(), content.length());
+    if (r != 0)
+        throw std::runtime_error("Failed to create add content to response buffer");
+}
 
 #ifdef USE_JSON
 nlohmann::json Request::Json() const {
