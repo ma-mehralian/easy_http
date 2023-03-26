@@ -46,7 +46,7 @@ public:
 	//! Get the client port.
 	int ClientPort() const { return client_port_; }
 
-	std::string Host() const { return host_; }
+	std::string Host() const { return uri_.host; }
 
 	//! Get the URL (no query string) for the request.
 	std::string Url() const { return uri_.path; }
@@ -86,11 +86,11 @@ private:
 		std::string full_path;
 		std::map<std::string, std::string> query;
 		std::string fragment;
+		std::string host;
 	} uri_;
 	RequestMethod method_;
 	std::string client_ip_;
 	int client_port_;
-	std::string host_;
 	std::map<std::string, std::string> headers_;
 
 

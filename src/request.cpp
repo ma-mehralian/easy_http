@@ -74,8 +74,6 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
     }
 #endif
 
-    host_ = evhttp_request_get_host(request);
-
     //--- read request uri
     //event_ptr<evhttp_uri> e_uri(evhttp_uri_parse(evhttp_request_get_uri(request)));
     event_ptr<const evhttp_uri> e_uri(evhttp_request_get_evhttp_uri(request));
@@ -89,7 +87,8 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
 	uri_.userinfo = evhttp_uri_get_userinfo(e_uri.get()) ? string(evhttp_uri_get_userinfo(e_uri.get())) : "";
 	uri_.port = evhttp_uri_get_port(e_uri.get());
 	uri_.fragment = evhttp_uri_get_fragment(e_uri.get()) ? string(evhttp_uri_get_fragment(e_uri.get())) : "";
-    
+	uri_.host = evhttp_uri_get_host(e_uri.get()) ? string(evhttp_uri_get_host(e_uri.get())) : "";
+
     //--- read request query string
 #if 1
     auto qury_char = evhttp_uri_get_query(e_uri.get());
