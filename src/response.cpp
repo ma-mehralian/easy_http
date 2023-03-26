@@ -50,10 +50,7 @@ Response::~Response() {
 void Response::SetContent(std::string content) {
 	is_file_ = false;
 	is_chunked_ = false;
-	int r = evbuffer_add(evhttp_request_get_output_buffer(request_.evrequest_),
-		content.c_str(), content.length());
-	if (r != 0)
-		throw std::runtime_error("Failed to create add content to response buffer");
+	request_.SetContent(content);
 }
 
 const Response::HeaderList& Response::GetHeaders() const {
