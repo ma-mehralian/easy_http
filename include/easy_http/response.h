@@ -40,6 +40,7 @@ public:
 	bool IsClientError() const { return status_code_ >= 400 && status_code_ < 500; }
 	bool IsServerError() const { return status_code_ >= 500 && status_code_ < 600; }
 	bool IsOk() const { return status_code_ == 200; }
+	bool IsUnauthorized() const { return status_code_ == 401; }
 	bool IsForbidden() const { return status_code_ == 403; }
 	bool IsRedirect() const { throw std::exception("Not Implemented"); }
 	bool IsEmpty() const { throw std::exception("Not Implemented"); }
