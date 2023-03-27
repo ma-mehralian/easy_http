@@ -1,4 +1,5 @@
 #include <iostream>
+#include <easy_http/client.h>
 #include <easy_http/server.h>
 
 using namespace std;
@@ -10,14 +11,15 @@ public:
 			std::bind(&MyController::Test1, this, std::placeholders::_1));
 		RegisterHandler("test2", Request::RequestMethod::POST,
 			std::bind(&MyController::Test2, this, std::placeholders::_1));
-
 	}
 
 private:
 	Response Test1(Request& request) {
+		Client c("127.0.0.1", 4313);
+		auto req = c.SendRequest(Request::RequestMethod::GET, "/api/color_classes");
 		cout << "test1 called" << endl;
 		Response response(request, 200, { {"Content-type", "application/json"} });
-		response.SetContent(R"({ "key": "value" } )");
+		response.SetContent(req.GetContent());
 		return response;
 	}
 
