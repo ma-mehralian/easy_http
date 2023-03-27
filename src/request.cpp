@@ -52,43 +52,46 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
 #pragma pop_macro("DELETE")
     
     // read connection info
+	auto conn = evhttp_request_get_connection(request);
+	if (conn) {
 #if 1
-    char* address;
-    ev_uint16_t port;
-    evhttp_connection_get_peer(evhttp_request_get_connection(request), &address, &port);
-    client_ip_ = string(address);
-    client_port_ = port;
+		char* address;
+		ev_uint16_t port;
+		evhttp_connection_get_peer(conn, &address, &port);
+		client_ip_ = string(address);
+		client_port_ = port;
 #else //BOTH METHODS MAKE A SIMILAR RESULTS!
-    auto s = evhttp_connection_get_addr(evhttp_request_get_connection(request));
-    if (s) {
-        char IP[128];
-        switch (s->sa_family)
-		{
-		case AF_INET:  // IPv4:
-		{
-			const sockaddr_in* sin = reinterpret_cast<const sockaddr_in*>(s);
-			evutil_inet_ntop(AF_INET, &(sin->sin_addr), IP, sizeof(IP));
-            client_ip_ = string(IP);
-			client_port_ = ntohs(sin->sin_port);
-			break;
-		}
-		case AF_INET6:  // IPv6
-		{
-			const sockaddr_in6* sin = reinterpret_cast<const sockaddr_in6*>(s);
-			evutil_inet_ntop(AF_INET6, &(sin->sin6_addr), IP, sizeof(IP));
-            client_ip_ = string(IP);
-			client_port_ = ntohs(sin->sin6_port);
-			break;
-		}
+		auto s = evhttp_connection_get_addr(conn);
+		if (s) {
+			char IP[128];
+			switch (s->sa_family)
+			{
+			case AF_INET:  // IPv4:
+			{
+				const sockaddr_in* sin = reinterpret_cast<const sockaddr_in*>(s);
+				evutil_inet_ntop(AF_INET, &(sin->sin_addr), IP, sizeof(IP));
+				client_ip_ = string(IP);
+				client_port_ = ntohs(sin->sin_port);
+				break;
+			}
+			case AF_INET6:  // IPv6
+			{
+				const sockaddr_in6* sin = reinterpret_cast<const sockaddr_in6*>(s);
+				evutil_inet_ntop(AF_INET6, &(sin->sin6_addr), IP, sizeof(IP));
+				client_ip_ = string(IP);
+				client_port_ = ntohs(sin->sin6_port);
+				break;
+			}
 
-		default:
-		{
-			printf("%s: Unknown socket address family: %d", __FUNCTION__, s->sa_family);
-			break;
+			default:
+			{
+				printf("%s: Unknown socket address family: %d", __FUNCTION__, s->sa_family);
+				break;
+			}
+			}
 		}
-		}
-    }
 #endif
+	}
 
     //--- read request uri
     //event_ptr<evhttp_uri> e_uri(evhttp_uri_parse(evhttp_request_get_uri(request)));
