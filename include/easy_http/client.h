@@ -6,12 +6,14 @@
 
 class Client {
 public:
+	typedef std::map<std::string, std::string> HeaderList;
+
 	Client(const std::string &ip, int port);
 	Client(const std::string &url);
 	~Client();
 
 	//! Send new request
-	Request SendRequest(Request::RequestMethod method, std::string path);
+	Request SendRequest(Request::RequestMethod method, std::string path, const HeaderList& headers = HeaderList());
 
 private:
 	//! libevent request handler

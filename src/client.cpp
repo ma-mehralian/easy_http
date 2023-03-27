@@ -57,10 +57,12 @@ void Client::Init() {
     evhttp_connection_set_timeout(e_conn_, 5);
 }
 
-Request Client::SendRequest(Request::RequestMethod method, std::string path) {
+Request Client::SendRequest(Request::RequestMethod method, std::string path, const HeaderList& headers) {
     auto e_request = evhttp_request_new(&Client::ResponseHandler, this);
 	auto e_headers = evhttp_request_get_output_headers(e_request);
 	evhttp_add_header(e_headers, "Host", http_ip_.c_str());
+	for (auto& h : headers)
+		evhttp_add_header(e_headers, h.first.c_str(), h.second.c_str());
 
     evhttp_cmd_type m = EVHTTP_REQ_GET;
 #undef DELETE
