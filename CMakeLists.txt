@@ -16,6 +16,7 @@ find_package(Libevent REQUIRED)
 
 set(PROJECT_HEADERS 
     include/${PROJECT_NAME}/server.h
+    include/${PROJECT_NAME}/client.h
     include/${PROJECT_NAME}/request.h
     include/${PROJECT_NAME}/response.h
     include/${PROJECT_NAME}/controller.h
@@ -23,6 +24,7 @@ set(PROJECT_HEADERS
 )
 add_library(${PROJECT_NAME} STATIC
     src/server.cpp
+    src/client.cpp
     src/request.cpp
     src/response.cpp
     src/controller.cpp
