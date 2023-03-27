@@ -41,7 +41,7 @@ protected:
 
 private:
 	//! libevent request handler
-	static void RequestHandler(struct evhttp_request* request, void* params);
+	static void RequestHandler(struct evhttp_request* request, void* server_ptr);
 
 	bool is_started_;
 	std::string http_ip_;
