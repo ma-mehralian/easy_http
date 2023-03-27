@@ -81,7 +81,6 @@ public:
 
 protected:
 	friend class Server;
-	friend class Response;
 
 	evhttp_request* evrequest_;
 	//! constructor
