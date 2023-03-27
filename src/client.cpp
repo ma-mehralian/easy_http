@@ -58,8 +58,9 @@ void Client::Init() {
 }
 
 Request Client::SendRequest(Request::RequestMethod method, std::string path) {
-    auto evrequest = evhttp_request_new(&Client::ResponseHandler, this);
-    evhttp_add_header(evhttp_request_get_output_headers(evrequest), "Host", http_ip_.c_str());
+    auto e_request = evhttp_request_new(&Client::ResponseHandler, this);
+	auto e_headers = evhttp_request_get_output_headers(e_request);
+	evhttp_add_header(e_headers, "Host", http_ip_.c_str());
 
     evhttp_cmd_type m = EVHTTP_REQ_GET;
 #undef DELETE
@@ -75,7 +76,7 @@ Request Client::SendRequest(Request::RequestMethod method, std::string path) {
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
-    evhttp_make_request(e_conn_, evrequest, m, path.c_str());
+    evhttp_make_request(e_conn_, e_request, m, path.c_str());
     event_base_dispatch(e_base_);
     if (!e_last_request_)
         throw runtime_error("Request failed");
