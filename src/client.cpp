@@ -12,7 +12,33 @@
 
 using namespace std;
 
-Client::Client(const std::string& ip, int port) : http_ip_(ip), http_port_(port), e_last_request_(0) {
+Client::Client(const std::string& ip, int port)
+    : http_ip_(ip), http_port_(port), e_last_request_(0) 
+{
+    Init();
+}
+
+Client::Client(const std::string& url) : e_last_request_(0) {
+    auto uri = evhttp_uri_parse(url.c_str());
+    http_port_ = evhttp_uri_get_port(uri);
+    http_ip_ = evhttp_uri_get_host(uri) ? string(evhttp_uri_get_host(uri)) : "";
+    evhttp_uri_free(uri);
+    Init();
+}
+
+Client::~Client() {
+    if (e_base_)
+        event_base_loopexit(e_base_, NULL);
+#ifdef _WIN32
+    WSACleanup();
+#endif
+    if (e_conn_)
+        evhttp_connection_free(e_conn_);
+    if (e_base_)
+        event_base_free(e_base_);
+}
+
+void Client::Init() {
 #ifdef _WIN32
     {
         /* If running on Windows need to initialise sockets. */
@@ -29,18 +55,6 @@ Client::Client(const std::string& ip, int port) : http_ip_(ip), http_port_(port)
     e_base_ = event_base_new();
     e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
     evhttp_connection_set_timeout(e_conn_, 5);
-}
-
-Client::~Client() {
-    if (e_base_)
-        event_base_loopexit(e_base_, NULL);
-#ifdef _WIN32
-    WSACleanup();
-#endif
-    if (e_conn_)
-        evhttp_connection_free(e_conn_);
-    if (e_base_)
-        event_base_free(e_base_);
 }
 
 Request Client::SendRequest(Request::RequestMethod method, std::string path) {

@@ -7,6 +7,7 @@
 class Client {
 public:
 	Client(const std::string &ip, int port);
+	Client(const std::string &url);
 	~Client();
 
 	//! Send new request
@@ -15,6 +16,8 @@ public:
 private:
 	//! libevent request handler
 	static void ResponseHandler(struct evhttp_request* request, void* client_ptr);
+
+	void Init();
 
 	std::string http_ip_;
 	uint16_t http_port_;
