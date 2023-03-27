@@ -3,6 +3,7 @@
 #include <event2/keyvalq_struct.h>
 #include <event2/buffer.h>
 #include <event2/util.h>
+#include <event2/event.h>
 #include <regex>
 #include <algorithm>
 #include <sstream>
