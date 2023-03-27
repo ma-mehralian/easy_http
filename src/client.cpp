@@ -64,15 +64,15 @@ Request Client::SendRequest(Request::RequestMethod method, std::string path) {
     evhttp_cmd_type m = EVHTTP_REQ_GET;
 #undef DELETE
     switch (method) {
-    case Request::RequestMethod::GET: m = EVHTTP_REQ_GET; break;
-    case Request::RequestMethod::POST: m = EVHTTP_REQ_POST; break;
-    case Request::RequestMethod::HEAD: m = EVHTTP_REQ_HEAD; break;
-    case Request::RequestMethod::PUT: m = EVHTTP_REQ_PUT; break;
-    case Request::RequestMethod::DELETE: m = EVHTTP_REQ_DELETE; break;
-    case Request::RequestMethod::OPTIONS: m = EVHTTP_REQ_OPTIONS; break;
-    case Request::RequestMethod::TRACE: m = EVHTTP_REQ_TRACE; break;
-    case Request::RequestMethod::CONNECT: m = EVHTTP_REQ_CONNECT; break;
-    case Request::RequestMethod::PATCH: m = EVHTTP_REQ_PATCH; break;
+    case Request::RequestMethod::GET:       m = EVHTTP_REQ_GET; break;
+    case Request::RequestMethod::POST:      m = EVHTTP_REQ_POST; break;
+    case Request::RequestMethod::HEAD:      m = EVHTTP_REQ_HEAD; break;
+    case Request::RequestMethod::PUT:       m = EVHTTP_REQ_PUT; break;
+    case Request::RequestMethod::DELETE:    m = EVHTTP_REQ_DELETE; break;
+    case Request::RequestMethod::OPTIONS:   m = EVHTTP_REQ_OPTIONS; break;
+    case Request::RequestMethod::TRACE:     m = EVHTTP_REQ_TRACE; break;
+    case Request::RequestMethod::CONNECT:   m = EVHTTP_REQ_CONNECT; break;
+    case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
     evhttp_make_request(e_conn_, evrequest, m, path.c_str());
