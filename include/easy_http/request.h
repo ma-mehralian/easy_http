@@ -19,6 +19,9 @@ public:
 	enum class RequestMethod { GET, POST, HEAD, PUT, DELETE, OPTIONS, TRACE, CONNECT, PATCH };
 	typedef std::map<std::string, std::string> HeaderList;
 
+	//! constructor
+	Request(evhttp_request* request);
+
 	//! reply received request
 	void Reply(int status_code, const HeaderList &headers);
 
@@ -80,11 +83,7 @@ public:
 	RequestMethod Method() const { return method_; }
 
 protected:
-	friend class Server;
-
 	evhttp_request* evrequest_;
-	//! constructor
-	Request(evhttp_request* request);
 
 private:
 	//scheme://[[userinfo]@]foo.com[:port]]/[path][?query][#fragment]
