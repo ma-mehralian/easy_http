@@ -152,6 +152,11 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
     }
 }
 
+Request::~Request() {
+    if (evhttp_request_is_owned(evrequest_))
+        evhttp_request_free(evrequest_);
+}
+
 struct chunk_req_state {
     evhttp_request* req;
     event* timer;

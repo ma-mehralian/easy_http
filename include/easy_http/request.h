@@ -22,6 +22,8 @@ public:
 	//! constructor
 	Request(evhttp_request* request);
 
+	~Request();
+
 	//! reply received request
 	void Reply(int status_code, const HeaderList &headers);
 
