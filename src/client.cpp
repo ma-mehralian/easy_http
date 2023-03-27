@@ -77,12 +77,15 @@ Request Client::SendRequest(Request::RequestMethod method, std::string path) {
 #pragma pop_macro("DELETE")
     evhttp_make_request(e_conn_, evrequest, m, path.c_str());
     event_base_dispatch(e_base_);
+    if (!e_last_request_)
+        throw runtime_error("Request failed");
     return Request(e_last_request_);
 }
 
 void Client::ResponseHandler(evhttp_request* request, void* client_ptr) {
     auto client = static_cast<Client*>(client_ptr);
     client->e_last_request_ = request;
-    evhttp_request_own(request);
+    if(request)
+        evhttp_request_own(request);
     event_base_loopbreak(client->e_base_);
 }
