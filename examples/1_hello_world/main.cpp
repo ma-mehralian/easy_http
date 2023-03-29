@@ -15,12 +15,20 @@ public:
 
 private:
 	Response Test1(Request& request) {
-		Client c("127.0.0.1", 4313);
-		auto req = c.SendRequest(Request::RequestMethod::GET, "/api/color_classes");
 		cout << "test1 called" << endl;
-		Response response(request, 200, { {"Content-type", "application/json"} });
-		response.SetContent(req.GetContent());
-		return response;
+		try {
+			Client c("http://127.0.0.1:4313");
+			auto req = c.SendRequest(Request::RequestMethod::GET, "/api/color_classes");
+			Response response(request, 200, { {"Content-type", "application/json"} });
+			response.SetContent(req.GetContent());
+			return response;
+		}
+		catch (const exception& e) {
+			Response response(request, 500);
+			response.SetContent("Host not accessible");
+			return response;
+		}
+
 	}
 
 	Response Test2(Request& request) {
