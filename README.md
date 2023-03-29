@@ -1,1 +1,1 @@
-git clone url://to/source/repository --recursive --shallow-submodules
+An easy to use http client/server based on libevent writen in c++.
