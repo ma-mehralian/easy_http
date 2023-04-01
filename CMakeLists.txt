@@ -64,4 +64,4 @@ install(
 )
 
 # --- examples
-add_subdirectory("examples/1_hello_world")
+add_subdirectory("examples/1_simple_server")
