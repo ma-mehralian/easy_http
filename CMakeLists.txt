@@ -65,3 +65,4 @@ install(
 
 # --- examples
 add_subdirectory("examples/1_simple_server")
+add_subdirectory("examples/2_simple_client")
