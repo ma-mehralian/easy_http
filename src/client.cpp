@@ -54,18 +54,33 @@ void Client::Init() {
 #endif
     e_base_ = event_base_new();
     e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
-    evhttp_connection_set_timeout(e_conn_, 5);
+    //evhttp_connection_set_timeout(e_conn_, 5);
 }
 
 Request Client::SendRequest(Request::RequestMethod method, std::string path, const HeaderList& headers) {
+    chunk_handler_ = nullptr;
     auto e_request = evhttp_request_new(&Client::ResponseHandler, this);
-	auto e_headers = evhttp_request_get_output_headers(e_request);
+    return MakeRequest(e_request, method, path, headers);
+}
+
+Request Client::SendChunkedRequest(std::function<void(Request&)> h, Request::RequestMethod method, std::string path, const HeaderList& headers) {
+    chunk_handler_ = h;
+    auto e_request = evhttp_request_new(&Client::ResponseHandler, this);
+    evhttp_request_set_chunked_cb(e_request, &Client::ChunkedResponseHandler);
+    return MakeRequest(e_request, method, path, headers);
+}
+
+Request Client::MakeRequest(struct evhttp_request* request, Request::RequestMethod method, std::string path, const HeaderList& headers) {
+    error_code_ = -1;
+    e_last_request_ = nullptr;
     evhttp_request_set_error_cb(request, &Client::ResponseErrorHandler);
+
+	auto e_headers = evhttp_request_get_output_headers(request);
 	evhttp_add_header(e_headers, "Host", http_ip_.c_str());
 	for (auto& h : headers)
 		evhttp_add_header(e_headers, h.first.c_str(), h.second.c_str());
 
-    evhttp_cmd_type m = EVHTTP_REQ_GET;
+    evhttp_cmd_type m;
 #undef DELETE
     switch (method) {
     case Request::RequestMethod::GET:       m = EVHTTP_REQ_GET; break;
@@ -79,7 +94,7 @@ Request Client::SendRequest(Request::RequestMethod method, std::string path, con
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
-    evhttp_make_request(e_conn_, e_request, m, path.c_str());
+    evhttp_make_request(e_conn_, request, m, path.c_str());
     event_base_dispatch(e_base_);
     if (error_code_ != -1) {
         switch ((evhttp_request_error)error_code_)
@@ -108,7 +123,9 @@ Request Client::SendRequest(Request::RequestMethod method, std::string path, con
     }
     if (!e_last_request_)
         throw runtime_error("Request failed");
-    return Request(e_last_request_);
+    else{
+		return Request(e_last_request_);
+    }
 }
 
 void Client::ResponseHandler(evhttp_request* request, void* client_ptr) {
@@ -117,6 +134,12 @@ void Client::ResponseHandler(evhttp_request* request, void* client_ptr) {
     if(request)
         evhttp_request_own(request);
     event_base_loopbreak(client->e_base_);
+}
+
+void Client::ChunkedResponseHandler(struct evhttp_request* request, void* client_ptr) {
+    auto client = static_cast<Client*>(client_ptr);
+    if (client->chunk_handler_) 
+        client->chunk_handler_(Request(request));
 }
 
 void Client::ResponseErrorHandler(enum evhttp_request_error err_code, void* client_ptr) {
