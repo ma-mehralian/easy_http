@@ -18,11 +18,13 @@ public:
 private:
 	//! libevent request handler
 	static void ResponseHandler(struct evhttp_request* request, void* client_ptr);
+	static void ResponseErrorHandler(enum evhttp_request_error err_code, void* client_ptr);
 
 	void Init();
 
 	std::string http_ip_;
 	uint16_t http_port_;
+	int error_code_;
 
 	struct evhttp_request* e_last_request_;
 	struct event_base* e_base_;
