@@ -18,6 +18,7 @@ public:
 	~Response();
 
 	void SetContent(std::string content);
+	void SetChunkCallback(std::function<bool(std::string&)> func) { request_.SetChunkCallback(func); }
 
 	//void PushHeader(std::string key, std::string value);
 	const HeaderList& GetHeaders() const;
