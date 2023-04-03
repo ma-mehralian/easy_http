@@ -52,6 +52,7 @@ Response Controller::CallHandler(Request& request) {
 			//request.UrlIs(url_prefix_ + std::get<0>(h), vars);
 			return std::get<2>(h)(request);
 		}
+	return Response(request, 404);
 }
 
 bool Controller::IsMatch(Request& request) {
