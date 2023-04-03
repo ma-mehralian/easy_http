@@ -56,7 +56,7 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
 	auto conn = evhttp_request_get_connection(request);
 	if (conn) {
 #if 1
-		char* address;
+		const char* address;
 		ev_uint16_t port;
 		evhttp_connection_get_peer(conn, &address, &port);
 		client_ip_ = string(address);
