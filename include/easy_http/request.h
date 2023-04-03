@@ -121,7 +121,7 @@ private:
 		try {
 			return IsFilled(list, key) ? GetVal<T>(list.at(key)) : default_value;
 		}
-		catch (const std::exception& e) {
+		catch (...) {
 			return default_value;
 		}
 	}
