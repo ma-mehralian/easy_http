@@ -43,7 +43,7 @@ static void do_term(evutil_socket_t sig, short events, void* arg)
 {
     struct event_base* base = (event_base*)arg;
     event_base_loopbreak(base);
-    fprintf(stderr, "Got %i, Terminating\n", sig);
+    fprintf(stderr, "Got %Ii, Terminating\n", sig);
 }
 
 static int display_listen_sock(struct evhttp_bound_socket* handle)
