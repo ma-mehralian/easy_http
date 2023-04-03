@@ -168,6 +168,7 @@ int Server::Start() {
     event_base_dispatch(e_base_);
     event_config_free(e_cfg);
     event_free(e_term);
+    return 0;
 }
 
 int Server::Stop() {
