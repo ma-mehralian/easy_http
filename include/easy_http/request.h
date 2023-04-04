@@ -51,10 +51,10 @@ public:
 
 	//!Retrieve a header from the request.
 	template <typename T>
-	T Header(std::string key, T default_value = T()) const { return GetVal<T>(headers_, key, default_value); }
+	T Header(std::string key, T default_value = T()) const { return GetVal<T>(input_headers_, key, default_value); }
 
-	//! Determine if the request contains a non-empty value for an input item.
-	bool HeaderFilled(std::string key) const { return IsFilled(headers_, key); }
+	//! Determine if the received request contains a non-empty value for an input item.
+	bool HeaderFilled(std::string key) const { return IsFilled(input_headers_, key); }
 
 	//! Get the client IP address.
 	std::string ClientIp() const { return client_ip_; }
@@ -102,7 +102,8 @@ private:
 	RequestMethod method_;
 	std::string client_ip_;
 	int client_port_;
-	std::map<std::string, std::string> headers_;
+	HeaderList input_headers_;
+	HeaderList output_headers_;
 	//-- chunck
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;

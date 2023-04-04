@@ -147,7 +147,7 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
     auto headers = evhttp_request_get_input_headers(request);
     auto h_keyval = headers->tqh_first;
     while (h_keyval){
-        headers_[h_keyval->key] = h_keyval->value;
+        input_headers_[h_keyval->key] = h_keyval->value;
         h_keyval = h_keyval->next.tqe_next;
     }
 }
@@ -205,7 +205,7 @@ void Request::Reply(int status_code, const HeaderList &headers) {
         evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
             h.first.c_str(), h.second.c_str());
 
-    for (auto& h : headers)
+    for (auto& h : output_headers_)
         evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
             h.first.c_str(), h.second.c_str());
 
