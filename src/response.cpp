@@ -16,7 +16,6 @@ Response::Response(const Response& response) : request_(response.request_) {
 
 Response& Response::operator=(const Response& response) {
 	request_ = response.request_;
-	headers_ = response.headers_;
 	status_code_ = response.status_code_;
 	return *this;
 }
@@ -34,6 +33,10 @@ Response& Response::SetChunkCallback(std::function<bool(std::string&)> func) {
 	return *this; 
 }
 
+Response& Response::SetHeaders(const HeaderList& headers) { 
+	request_.SetHeaders(headers);
+	return *this; 
+}
 
 Response& Response::SetFilePath(std::string path) {
 	request_.SetFileContent(path);

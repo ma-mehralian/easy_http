@@ -23,6 +23,9 @@ public:
 	//! set handler for chunked response
 	Response& SetChunkCallback(std::function<bool(std::string&)> func);
 
+	//! set response headers
+	Response& SetHeaders(const HeaderList& headers);
+
 	//void SetProtocolVersion(std::string version) { version_ = version; }
 	//std::string GetProtocolVersion() const { return version_; }
 
@@ -50,8 +53,6 @@ public:
 
 protected:
 	Request& request_;
-	HeaderList headers_;
-	//std::string version_;
 	int status_code_;
 };
 
