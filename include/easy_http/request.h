@@ -24,9 +24,6 @@ public:
 
 	~Request();
 
-	//! reply received request
-	void Reply(int status_code, const HeaderList &headers);
-
 	Request& SetChunkCallback(std::function<bool(std::string&)> func);
 
 #ifdef USE_JSON
@@ -91,6 +88,11 @@ public:
 	RequestMethod Method() const { return method_; }
 
 protected:
+	friend class Response;
+
+	//! reply the received request (this function is called in Response class)
+	void Reply(int status_code);
+
 	evhttp_request* evrequest_;
 
 private:

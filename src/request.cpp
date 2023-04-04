@@ -191,7 +191,7 @@ http_chunked_trickle_cb(evutil_socket_t fd, short events, void* arg) {
     }
 }
 
-void Request::Reply(int status_code, const HeaderList &headers) {
+void Request::Reply(int status_code) {
     //--- add headers
     HeaderList default_headers = {
         {"Access-Control-Allow-Origin", "*"},

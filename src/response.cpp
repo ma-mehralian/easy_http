@@ -49,6 +49,6 @@ Response& Response::SetStatusCode(int code) {
 }
 
 int Response::Send() {
-	request_.Reply(status_code_, headers_);
+	request_.Reply(status_code_);
 	return 0;
 }
