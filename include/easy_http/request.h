@@ -49,7 +49,13 @@ public:
 	//! Determine if the request contains a non-empty value for an input item.
 	bool QueryFilled(std::string key) const { return IsFilled(uri_.query, key); }
 
-	//!Retrieve a header from the request.
+	//! add new header to sending request headers
+	Request& PushHeader(std::string key, std::string value);
+
+	//! set sending request headers
+	Request& SetHeaders(const HeaderList& headers);
+
+	//!Retrieve a header from the received request.
 	template <typename T>
 	T Header(std::string key, T default_value = T()) const { return GetVal<T>(input_headers_, key, default_value); }
 

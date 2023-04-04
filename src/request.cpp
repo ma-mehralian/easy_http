@@ -255,10 +255,8 @@ Request& Request::SetFileContent(std::string file_path) {
     if (!file_path.empty() && (fd = open_file(file_path, size)) > 0) {
         string ext = filesystem::path(file_path).extension().string();
         auto mime = content_type_table.find(ext);
-        if (mime != content_type_table.end()) {
-            evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
-                "Content-type", mime->second.c_str());
-        }
+        if (mime != content_type_table.end())
+            PushHeader("Content-type", mime->second);
 #ifdef NDEBUG
         //evbuffer_set_flags(response_buffer.get(), EVBUFFER_FLAG_DRAINS_TO_FD);
         int r = evbuffer_add_file(evhttp_request_get_output_buffer(evrequest_), fd, 0, size);
@@ -270,6 +268,18 @@ Request& Request::SetFileContent(std::string file_path) {
     }
     else
         throw std::runtime_error("Cannot open file");
+    return *this;
+}
+
+//! add new header to sending request headers
+Request& Request::PushHeader(std::string key, std::string value) { 
+    output_headers_[key] = value;
+    return *this;
+}
+
+//! set sending request headers
+Request& Request::SetHeaders(const HeaderList& headers) { 
+    output_headers_ = headers; 
     return *this;
 }
 
