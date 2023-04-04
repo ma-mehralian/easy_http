@@ -27,7 +27,7 @@ public:
 	//! reply received request
 	void Reply(int status_code, const HeaderList &headers);
 
-	void SetChunkCallback(std::function<bool(std::string&)> func);
+	Request& SetChunkCallback(std::function<bool(std::string&)> func);
 
 #ifdef USE_JSON
 	//! Get the JSON payload for the request.
@@ -37,10 +37,10 @@ public:
 	std::string GetContent() const;
 
 	// set string content
-	void SetContent(std::string content);
+	Request& SetContent(std::string content);
 
 	// set file content
-	void SetFileContent(std::string file_path);
+	Request& SetFileContent(std::string file_path);
 
 	//!Retrieve a query string item from the request.
 	template <typename T>

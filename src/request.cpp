@@ -223,9 +223,10 @@ void Request::Reply(int status_code, const HeaderList &headers) {
     }
 }
 
-void Request::SetChunkCallback(std::function<bool(std::string&)> func) {
+Request& Request::SetChunkCallback(std::function<bool(std::string&)> func) {
     chunk_callback_ = func;
     is_chunked_ = true;
+    return *this;
 }
 
 std::string Request::GetContent() const {
@@ -239,15 +240,16 @@ std::string Request::GetContent() const {
     return content;
 }
 
-void Request::SetContent(std::string content) {
+Request& Request::SetContent(std::string content) {
     auto buffer = evhttp_request_get_output_buffer(evrequest_);
     int r = evbuffer_add(buffer, content.c_str(), content.length());
     if (r != 0)
         throw std::runtime_error("Failed to create add content to response buffer");
+    return *this;
 }
 
 // set file content
-void Request::SetFileContent(std::string file_path) {
+Request& Request::SetFileContent(std::string file_path) {
     int64_t size;
     int fd;
     if (!file_path.empty() && (fd = open_file(file_path, size)) > 0) {
@@ -268,6 +270,7 @@ void Request::SetFileContent(std::string file_path) {
     }
     else
         throw std::runtime_error("Cannot open file");
+    return *this;
 }
 
 #ifdef USE_JSON
