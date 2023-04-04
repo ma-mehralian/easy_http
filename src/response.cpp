@@ -6,9 +6,9 @@
 
 using namespace std;
 
-Response::Response(Request& request, int status, HeaderList headers)
-	: request_(request), status_code_(status), headers_(headers)
-{}
+Response::Response(Request& request, int status, HeaderList headers): request_(request){
+	SetStatusCode(status).SetHeaders(headers);
+}
 
 Response::Response(const Response& response) : request_(response.request_) {
 	this->operator=(response);
@@ -24,16 +24,25 @@ Response& Response::operator=(const Response& response) {
 Response::~Response() {
 }
 
-void Response::SetContent(std::string content) {
+Response& Response::SetContent(std::string content) {
 	request_.SetContent(content);
+	return *this; 
 }
 
-const Response::HeaderList& Response::GetHeaders() const {
-	return headers_;
+Response& Response::SetChunkCallback(std::function<bool(std::string&)> func) { 
+	request_.SetChunkCallback(func); 
+	return *this; 
 }
 
-void Response::SetFilePath(std::string path) {
+
+Response& Response::SetFilePath(std::string path) {
 	request_.SetFileContent(path);
+	return *this; 
+}
+
+Response& Response::SetStatusCode(int code) {
+	status_code_ = code; 
+	return *this; 
 }
 
 int Response::Send() {

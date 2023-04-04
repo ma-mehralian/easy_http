@@ -17,20 +17,20 @@ public:
 
 	~Response();
 
-	void SetContent(std::string content);
-	void SetChunkCallback(std::function<bool(std::string&)> func) { request_.SetChunkCallback(func); }
+	//! set response content
+	Response& SetContent(std::string content);
 
-	//void PushHeader(std::string key, std::string value);
-	const HeaderList& GetHeaders() const;
+	//! set handler for chunked response
+	Response& SetChunkCallback(std::function<bool(std::string&)> func);
 
 	//void SetProtocolVersion(std::string version) { version_ = version; }
 	//std::string GetProtocolVersion() const { return version_; }
 
-	void SetStatusCode(int code) { status_code_ = code; }
+	Response& SetStatusCode(int code);
 	int GetStatusCode() const { return status_code_; }
 
-	void SetCharset(std::string charset) { charset_ = charset; }
-	std::string GetCharset() const { return charset_; }
+	//Response& SetCharset(std::string charset);
+	//std::string GetCharset() const;
 
 	bool IsInvalid() const { return status_code_ < 100 || status_code_ >= 600; }
 	bool IsInformational() const { return status_code_ >= 100 && status_code_ < 200; }
@@ -44,7 +44,7 @@ public:
 	bool IsRedirect() const { throw std::exception("Not Implemented"); }
 	bool IsEmpty() const { throw std::exception("Not Implemented"); }
 
-	void SetFilePath(std::string path);
+	Response& SetFilePath(std::string path);
 
 	int Send();
 
@@ -53,8 +53,6 @@ protected:
 	HeaderList headers_;
 	//std::string version_;
 	int status_code_;
-	std::string charset_;
-	bool is_file_ = false;
 };
 
 #endif // !_HTTP_RESPONSE_H_
