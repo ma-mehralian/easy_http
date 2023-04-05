@@ -5,17 +5,21 @@
 using namespace std;
 
 int main(int argn, char* argc[]) {
-	Client c("http://127.0.0.1:4110");
+	Client c("127.0.0.1", 4110);
 	auto h = [](Request& request) {
 		printf("new chunk:\n %s \n", request.GetContent().c_str());
 	};
 
 	try {
-		auto req = c.SendRequest(Request::RequestMethod::POST, "/engine?service=start");
-		cout << "response: " << req.GetContent() << endl;
-		auto req2 = c.SendChunkedRequest(h, Request::RequestMethod::GET, "/engine/live");
-		cout << "calling:" << req.FullUrl() << endl;
-		cout << "response: " << req2.GetContent();
+		auto req1 = c.CreateRequest(Request::RequestMethod::POST, "/engine?service=start");
+		cout << "calling:" << req1.FullUrl() << endl;
+		auto res1 = c.SendRequest(req1);
+		cout << "response: " << res1.GetContent() << endl;
+
+		auto req2 = c.CreateRequest(Request::RequestMethod::GET, "/engine/live");
+		cout << "calling:" << req2.FullUrl() << endl;
+		auto res2 = c.SendChunkedRequest(h, req2);
+		cout << "response: " << res2.GetContent();
 	}
 	catch (const exception& e) {
 		cout << "request failed: " << e.what() << endl;
