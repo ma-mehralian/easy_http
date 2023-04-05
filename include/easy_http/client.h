@@ -9,8 +9,8 @@ public:
 	typedef std::map<std::string, std::string> HeaderList;
 	
 	//! create new connection to ip:port and keep it open
-	Client(const std::string& ip, int port = -1);
-	Client(const std::string &url);
+	Client(const std::string& ip, int port);
+	Client(const std::string& url);
 
 	~Client();
 
