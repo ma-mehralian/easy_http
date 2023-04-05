@@ -106,6 +106,12 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
     }
 }
 
+Request::Request(evhttp_request* request, Request::RequestMethod method, std::string url)
+	:evrequest_(request), method_(method)
+{
+    ParsUri(url);
+}
+
 Request::~Request() {
     if (evhttp_request_is_owned(evrequest_))
         evhttp_request_free(evrequest_);

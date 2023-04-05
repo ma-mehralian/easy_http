@@ -19,8 +19,11 @@ public:
 	enum class RequestMethod { GET, POST, HEAD, PUT, DELETE, OPTIONS, TRACE, CONNECT, PATCH };
 	typedef std::map<std::string, std::string> HeaderList;
 
-	//! constructor
+	//! constructor for the received request (used for Server)
 	Request(evhttp_request* request);
+
+	//! constructor for a sending request (used for Client)
+	Request(evhttp_request* request, Request::RequestMethod method, std::string url);
 
 	~Request();
 
@@ -89,6 +92,8 @@ public:
 
 protected:
 	friend class Response;
+	friend class Client;
+
 
 	//! reply the received request (this function is called in Response class)
 	void Reply(int status_code);
