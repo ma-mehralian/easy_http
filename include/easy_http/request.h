@@ -116,10 +116,11 @@ private:
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;
 
+	//! fill uri_ values from input url or path
+	void ParsUri(std::string url);
 
 	//! check if key exist in list and is not empty
 	bool IsFilled(const std::map<std::string, std::string>& list, std::string key) const;
-
 
 	template <typename T>
 	T GetVal(std::string str_value) const;
