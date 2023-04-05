@@ -40,15 +40,15 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
 #undef DELETE
     // read reaquest type
     switch (evhttp_request_get_command(request)) {
-    case EVHTTP_REQ_GET: method_ = RequestMethod::GET; break;
-    case EVHTTP_REQ_POST: method_ = RequestMethod::POST; break;
-    case EVHTTP_REQ_HEAD: method_ = RequestMethod::HEAD; break;
-    case EVHTTP_REQ_PUT: method_ = RequestMethod::PUT; break;
-    case EVHTTP_REQ_DELETE: method_ = RequestMethod::DELETE; break;
-    case EVHTTP_REQ_OPTIONS: method_ = RequestMethod::OPTIONS; break;
-    case EVHTTP_REQ_TRACE: method_ = RequestMethod::TRACE; break;
-    case EVHTTP_REQ_CONNECT: method_ = RequestMethod::CONNECT; break;
-    case EVHTTP_REQ_PATCH: method_ = RequestMethod::PATCH; break;
+    case EVHTTP_REQ_GET:        method_ = RequestMethod::GET; break;
+    case EVHTTP_REQ_POST:       method_ = RequestMethod::POST; break;
+    case EVHTTP_REQ_HEAD:       method_ = RequestMethod::HEAD; break;
+    case EVHTTP_REQ_PUT:        method_ = RequestMethod::PUT; break;
+    case EVHTTP_REQ_DELETE:     method_ = RequestMethod::DELETE; break;
+    case EVHTTP_REQ_OPTIONS:    method_ = RequestMethod::OPTIONS; break;
+    case EVHTTP_REQ_TRACE:      method_ = RequestMethod::TRACE; break;
+    case EVHTTP_REQ_CONNECT:    method_ = RequestMethod::CONNECT; break;
+    case EVHTTP_REQ_PATCH:      method_ = RequestMethod::PATCH; break;
     }
 #pragma pop_macro("DELETE")
     
