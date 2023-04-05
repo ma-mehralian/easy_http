@@ -7,20 +7,25 @@
 class Client {
 public:
 	typedef std::map<std::string, std::string> HeaderList;
-
-	Client(const std::string &ip, int port);
+	
+	//! create new connection to ip:port and keep it open
+	Client(const std::string& ip, int port = -1);
 	Client(const std::string &url);
+
 	~Client();
 
-	//! Send new request
-	Request SendRequest(Request::RequestMethod method, std::string path, const HeaderList& headers = HeaderList());
+	//! create new request for the client connection
+	Request CreateRequest(Request::RequestMethod method, std::string path, const HeaderList& headers = HeaderList());
 
-	//! Send chunked request
-	Request SendChunkedRequest(std::function<void(Request&)> h, Request::RequestMethod method, std::string path, const HeaderList& headers = HeaderList());
+	//! Send a new request
+	Request SendRequest(Request& request);
+
+	//! Send a new request with chuncked response
+	Request SendChunkedRequest(std::function<void(Request&)> h, Request& request);
 
 private:
 
-	Request MakeRequest(struct evhttp_request* request, Request::RequestMethod method, std::string path, const HeaderList& headers);
+	Request MakeRequest(Request& request);
 
 	//! libevent request handler
 	static void ResponseHandler(struct evhttp_request* request, void* client_ptr);

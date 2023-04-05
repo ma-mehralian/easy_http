@@ -10,6 +10,8 @@
 #include <afunix.h>
 #endif
 
+#define URL_MAX 4096
+
 using namespace std;
 
 Client::Client(const std::string& ip, int port)
@@ -57,32 +59,46 @@ void Client::Init() {
     //evhttp_connection_set_timeout(e_conn_, 5);
 }
 
-Request Client::SendRequest(Request::RequestMethod method, std::string path, const HeaderList& headers) {
+Request Client::CreateRequest(Request::RequestMethod method, std::string path, const HeaderList& headers) {
+    char buf[URL_MAX];
+    int r = 0;
+    auto uri = evhttp_uri_parse(path.c_str());
+	if (uri == NULL)
+        throw runtime_error("Invalid path");
+    r += evhttp_uri_set_host(uri, http_ip_.c_str());
+    r += evhttp_uri_set_port(uri, http_port_);
+    if (r < 0 || !evhttp_uri_join(uri, buf, URL_MAX)) {
+        evhttp_uri_free(uri);
+        throw runtime_error("Invalid ip or port");
+    }
+    evhttp_uri_free(uri);
+    string url(buf);
+    auto req = evhttp_request_new(&Client::ResponseHandler, this);
+    Request request(req, method, url);
+    request.SetHeaders(headers);
+    return request;
+}
+
+Request Client::SendRequest(Request& request) {
     chunk_handler_ = nullptr;
-    auto e_request = evhttp_request_new(&Client::ResponseHandler, this);
-    return MakeRequest(e_request, method, path, headers);
+    return MakeRequest(request);
 }
 
-Request Client::SendChunkedRequest(std::function<void(Request&)> h, Request::RequestMethod method, std::string path, const HeaderList& headers) {
+Request Client::SendChunkedRequest(std::function<void(Request&)> h, Request& request) {
     chunk_handler_ = h;
-    auto e_request = evhttp_request_new(&Client::ResponseHandler, this);
-    evhttp_request_set_chunked_cb(e_request, &Client::ChunkedResponseHandler);
-    return MakeRequest(e_request, method, path, headers);
+    evhttp_request_set_chunked_cb(request.evrequest_, &Client::ChunkedResponseHandler);
+    return MakeRequest(request);
 }
 
-Request Client::MakeRequest(struct evhttp_request* request, Request::RequestMethod method, std::string path, const HeaderList& headers) {
+Request Client::MakeRequest(Request& request) {
     error_code_ = -1;
     e_last_request_ = nullptr;
-    evhttp_request_set_error_cb(request, &Client::ResponseErrorHandler);
-
-	auto e_headers = evhttp_request_get_output_headers(request);
-	evhttp_add_header(e_headers, "Host", http_ip_.c_str());
-	for (auto& h : headers)
-		evhttp_add_header(e_headers, h.first.c_str(), h.second.c_str());
+    evhttp_request_set_error_cb(request.evrequest_, &Client::ResponseErrorHandler);
+    request.PushHeader("Host", http_ip_);
 
     evhttp_cmd_type m;
 #undef DELETE
-    switch (method) {
+    switch (request.Method()) {
     case Request::RequestMethod::GET:       m = EVHTTP_REQ_GET; break;
     case Request::RequestMethod::POST:      m = EVHTTP_REQ_POST; break;
     case Request::RequestMethod::HEAD:      m = EVHTTP_REQ_HEAD; break;
@@ -94,7 +110,7 @@ Request Client::MakeRequest(struct evhttp_request* request, Request::RequestMeth
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
-    evhttp_make_request(e_conn_, request, m, path.c_str());
+    evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
     event_base_dispatch(e_base_);
     if (error_code_ != -1) {
         switch ((evhttp_request_error)error_code_)
