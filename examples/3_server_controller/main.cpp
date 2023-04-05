@@ -18,9 +18,9 @@ private:
 		cout << "test1 called" << endl;
 		try {
 			Client c("http://127.0.0.1:4313");
-			auto req = c.SendRequest(Request::RequestMethod::GET, "/api/color_classes");
+			auto res = c.SendRequest(c.CreateRequest(Request::RequestMethod::GET, "/api/color_classes"));
 			Response response(request, 200, { {"Content-type", "application/json"} });
-			response.SetContent(req.GetContent());
+			response.SetContent(res.GetContent());
 			return response;
 		}
 		catch (const exception& e) {
