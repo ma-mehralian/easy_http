@@ -34,7 +34,7 @@ public:
 	nlohmann::json Json() const;
 #endif // USE_JSON
 
-	std::string GetContent() const;
+	const std::string& GetContent() const;
 
 	// set string content
 	Request& SetContent(const std::string& content);
@@ -66,15 +66,15 @@ public:
 	bool HeaderFilled(std::string key) const { return IsFilled(input_headers_, key); }
 
 	//! Get the client IP address.
-	std::string ClientIp() const { return client_ip_; }
+	const std::string& ClientIp() const { return client_ip_; }
 
 	//! Get the client port.
 	int ClientPort() const { return client_port_; }
 
-	std::string Host() const { return uri_.host; }
+	const std::string& Host() const { return uri_.host; }
 
 	//! Get the URL (no query string) for the request.
-	std::string Url() const { return uri_.path; }
+	const std::string& Url() const { return uri_.path; }
 
 	//! Determine if the URL matches a given pattern (regular expression) and fill vars with regex groups value
 	//! sample pattern: "/engine/([0-9]+)/"
@@ -88,7 +88,7 @@ public:
 	}
 
 	//! Get the URL for the request with the added query string parameters
-	std::string FullUrl() const { return uri_.full_path; }
+	const std::string& FullUrl() const { return uri_.full_path; }
 
 	//! Get the request method.
 	RequestMethod Method() const { return method_; }
