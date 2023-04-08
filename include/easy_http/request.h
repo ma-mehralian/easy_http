@@ -37,7 +37,7 @@ public:
 	std::string GetContent() const;
 
 	// set string content
-	Request& SetContent(std::string content);
+	Request& SetContent(const std::string& content);
 
 	// set file content
 	Request& SetFileContent(std::string file_path);

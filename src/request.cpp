@@ -200,7 +200,7 @@ std::string Request::GetContent() const {
     return content;
 }
 
-Request& Request::SetContent(std::string content) {
+Request& Request::SetContent(const std::string& content) {
     auto buffer = evhttp_request_get_output_buffer(evrequest_);
     int r = evbuffer_add(buffer, content.c_str(), content.length());
     if (r != 0)
