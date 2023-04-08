@@ -39,6 +39,9 @@ public:
 	// set string content
 	Request& SetContent(const std::string& content);
 
+	// set binary content
+	Request& SetContent(const std::vector<char>& content);
+
 	// set file content
 	Request& SetFileContent(std::string file_path);
 

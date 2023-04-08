@@ -208,7 +208,14 @@ Request& Request::SetContent(const std::string& content) {
     return *this;
 }
 
-// set file content
+Request& Request::SetContent(const std::vector<char>& content) {
+    auto buffer = evhttp_request_get_output_buffer(evrequest_);
+    int r = evbuffer_add(buffer, content.data(), content.size());
+    if (r != 0)
+        throw std::runtime_error("Failed to create add content to response buffer");
+    return *this;
+}
+
 Request& Request::SetFileContent(std::string file_path) {
     int64_t size;
     int fd;
@@ -231,13 +238,13 @@ Request& Request::SetFileContent(std::string file_path) {
     return *this;
 }
 
-//! add new header to sending request headers
+
 Request& Request::PushHeader(std::string key, std::string value) { 
     output_headers_[key] = value;
     return *this;
 }
 
-//! set sending request headers
+
 Request& Request::SetHeaders(const HeaderList& headers) { 
     output_headers_ = headers; 
     return *this;
