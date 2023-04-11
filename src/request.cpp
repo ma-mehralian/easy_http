@@ -7,8 +7,17 @@
 #include <regex>
 #include <algorithm>
 #include <sstream>
-#include <filesystem>
 #include "utils.h"
+
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace FS = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace FS = std::experimental::filesystem;
+#else
+#error "no filesystem support!"
+#endif
 
 using namespace std;
 
@@ -220,7 +229,7 @@ Request& Request::SetFileContent(std::string file_path) {
     int64_t size;
     int fd;
     if (!file_path.empty() && (fd = open_file(file_path, size)) > 0) {
-        string ext = filesystem::path(file_path).extension().string();
+        string ext = FS::path(file_path).extension().string();
         auto mime = content_type_table.find(ext);
         if (mime != content_type_table.end())
             PushHeader("Content-type", mime->second);

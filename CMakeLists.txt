@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 project(easy_http CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(USE_SPDLOG   "set ON to use spdlog" OFF)
 option(USE_JSON     "set ON to use nlohman json for json responses" OFF)
@@ -37,6 +38,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER "${PROJECT_HEADERS}")
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} PRIVATE libevent::extra)
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+    target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
+endif()
 
 # --- use spdlog
 if(USE_SPDLOG)
