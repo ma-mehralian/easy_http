@@ -50,9 +50,8 @@ void Client::Init() {
         WSAStartup(wVersionRequested, &wsaData);
     }
 #else
-    if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-        return -1;
-    }
+    if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+        throw runtime_error("could not init sockets!");
 #endif
     e_base_ = event_base_new();
     e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
