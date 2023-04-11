@@ -11,7 +11,6 @@ set(PROJECT_PATCH_VERSION 0)
 set(PROJECT_VERSION
     ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
 
-set(Libevent_DIR    "G:/dev/refs/libevent/install/lib/cmake/libevent")
 find_package(Libevent REQUIRED)
 
 set(PROJECT_HEADERS 
