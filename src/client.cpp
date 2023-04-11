@@ -92,7 +92,11 @@ Request Client::SendChunkedRequest(std::function<void(Request&)> h, Request& req
 Request Client::MakeRequest(Request& request) {
     error_code_ = -1;
     e_last_request_ = nullptr;
-    evhttp_request_set_error_cb(request.evrequest_, &Client::ResponseErrorHandler);
+    evhttp_request_set_error_cb(request.evrequest_, 
+		[](enum evhttp_request_error err_code, void* client_ptr) {
+			Client::ResponseErrorHandler(err_code, client_ptr);
+		});
+
     request.PushHeader("Host", http_ip_);
 
     evhttp_cmd_type m;
@@ -157,7 +161,7 @@ void Client::ChunkedResponseHandler(struct evhttp_request* request, void* client
         client->chunk_handler_(Request(request));
 }
 
-void Client::ResponseErrorHandler(enum evhttp_request_error err_code, void* client_ptr) {
+void Client::ResponseErrorHandler(int err_code, void* client_ptr) {
     auto client = static_cast<Client*>(client_ptr);
     client->error_code_ = err_code;
 }

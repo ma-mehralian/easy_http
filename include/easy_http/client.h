@@ -30,7 +30,7 @@ private:
 	//! libevent request handler
 	static void ResponseHandler(struct evhttp_request* request, void* client_ptr);
 	static void ChunkedResponseHandler(struct evhttp_request* request, void* client_ptr);
-	static void ResponseErrorHandler(enum evhttp_request_error err_code, void* client_ptr);
+	static void ResponseErrorHandler(int err_code, void* client_ptr);
 
 	void Init();
 
