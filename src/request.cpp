@@ -281,6 +281,11 @@ bool Request::UrlIs(std::string pattern, std::vector<std::string>& vars) const {
     return false;
 }
 
+bool Request::UrlIs(std::string pattern) const {
+	std::smatch base_match;
+    return std::regex_match(uri_.path, base_match, std::regex(pattern));
+}
+
 void Request::ParsUri(std::string url) {
      uri_.full_path = url;
     //event_ptr<const evhttp_uri> e_uri(evhttp_request_get_evhttp_uri(request));
@@ -376,3 +381,4 @@ vector<int> Request::GetVal(std::string str_value) const {
 	}
 	return result;
 }
+    

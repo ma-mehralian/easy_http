@@ -78,7 +78,8 @@ public:
 
 	//! Determine if the URL matches a given pattern (regular expression) and fill vars with regex groups value
 	//! sample pattern: "/engine/([0-9]+)/"
-	bool UrlIs(std::string pattern, std::vector<std::string>& vars = std::vector<std::string>()) const;
+	bool UrlIs(std::string pattern, std::vector<std::string>& vars) const;
+	bool UrlIs(std::string pattern) const;
 
 	template<typename... outs>
 	std::tuple<outs...> UrlVars(std::string pattern) const {
