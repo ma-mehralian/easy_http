@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argn, char* argc[]) {
 	Client c("127.0.0.1", 4110);
-	auto h = [](Request& request) {
+	auto h = [](const Request& request) {
 		printf("new chunk:\n %s \n", request.GetContent().c_str());
 	};
 

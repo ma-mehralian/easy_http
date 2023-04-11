@@ -21,7 +21,7 @@ public:
 	Request SendRequest(Request& request);
 
 	//! Send a new request with chuncked response
-	Request SendChunkedRequest(std::function<void(Request&)> h, Request& request);
+	Request SendChunkedRequest(std::function<void(const Request&)> h, Request& request);
 
 private:
 
@@ -37,7 +37,7 @@ private:
 	std::string http_ip_;
 	uint16_t http_port_;
 	int error_code_;
-	std::function<void(Request&)> chunk_handler_;
+	std::function<void(const Request&)> chunk_handler_;
 
 	struct evhttp_request* e_last_request_;
 	struct event_base* e_base_;

@@ -83,7 +83,7 @@ Request Client::SendRequest(Request& request) {
     return MakeRequest(request);
 }
 
-Request Client::SendChunkedRequest(std::function<void(Request&)> h, Request& request) {
+Request Client::SendChunkedRequest(std::function<void(const Request&)> h, Request& request) {
     chunk_handler_ = h;
     evhttp_request_set_chunked_cb(request.evrequest_, &Client::ChunkedResponseHandler);
     return MakeRequest(request);
