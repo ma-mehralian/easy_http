@@ -44,8 +44,8 @@ public:
 	bool IsOk() const { return status_code_ == 200; }
 	bool IsUnauthorized() const { return status_code_ == 401; }
 	bool IsForbidden() const { return status_code_ == 403; }
-	bool IsRedirect() const { throw std::exception("Not Implemented"); }
-	bool IsEmpty() const { throw std::exception("Not Implemented"); }
+	bool IsRedirect() const { throw std::runtime_error("Not Implemented"); }
+	bool IsEmpty() const { throw std::runtime_error("Not Implemented"); }
 
 	Response& SetFilePath(std::string path);
 

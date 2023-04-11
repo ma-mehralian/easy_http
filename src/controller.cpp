@@ -5,7 +5,7 @@ using namespace std;
 	
 Controller::Controller(std::string url_prefix) : url_prefix_(url_prefix) {
 	if (url_prefix[0] != '/')
-		throw std::exception("url prefix should be started with '/'");
+		throw std::runtime_error("url prefix should be started with '/'");
 	middleware_chain_ = nullptr;
 }
 
