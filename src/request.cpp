@@ -198,6 +198,11 @@ Request& Request::SetChunkCallback(std::function<bool(std::string&)> func) {
     return *this;
 }
 
+int Request::Wait() {
+    auto base = evhttp_connection_get_base(evhttp_request_get_connection(evrequest_));
+    return event_base_dispatch(base);
+}
+
 const std::string Request::GetContent() const {
     string content;
     auto buffer = evhttp_request_get_input_buffer(evrequest_);

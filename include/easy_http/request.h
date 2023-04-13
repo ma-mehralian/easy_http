@@ -29,6 +29,8 @@ public:
 
 	Request& SetChunkCallback(std::function<bool(std::string&)> func);
 
+	int Wait();
+
 #ifdef USE_JSON
 	//! Get the JSON payload for the request.
 	nlohmann::json Json() const;
