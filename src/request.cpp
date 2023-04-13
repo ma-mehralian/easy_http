@@ -203,6 +203,10 @@ int Request::Wait() {
     return event_base_dispatch(base);
 }
 
+void Request::Cancel() {
+    return evhttp_cancel_request(evrequest_);
+}
+
 const std::string Request::GetContent() const {
     string content;
     auto buffer = evhttp_request_get_input_buffer(evrequest_);

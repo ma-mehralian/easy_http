@@ -31,6 +31,8 @@ public:
 
 	int Wait();
 
+	void Cancel();
+
 #ifdef USE_JSON
 	//! Get the JSON payload for the request.
 	nlohmann::json Json() const;
