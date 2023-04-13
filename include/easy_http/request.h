@@ -34,7 +34,7 @@ public:
 	nlohmann::json Json() const;
 #endif // USE_JSON
 
-	const std::string& GetContent() const;
+	const std::string GetContent() const;
 
 	// set string content
 	Request& SetContent(const std::string& content);

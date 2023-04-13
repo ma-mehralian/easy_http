@@ -198,7 +198,7 @@ Request& Request::SetChunkCallback(std::function<bool(std::string&)> func) {
     return *this;
 }
 
-const std::string& Request::GetContent() const {
+const std::string Request::GetContent() const {
     string content;
     auto buffer = evhttp_request_get_input_buffer(evrequest_);
     auto req_body_len = evbuffer_get_length(buffer);
