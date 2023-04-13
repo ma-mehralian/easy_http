@@ -4,41 +4,46 @@
 #include <easy_http/request.h>
 #include <easy_http/response.h>
 #include <easy_http/middleware.h>
+#include <easy_http/route.h>
 #include <functional>
 
 class Controller {
 public:
-	//! contructors
-	Controller(std::string url_prefix = "/");
-	//Controller(const Controller& controller) :
-	//	url_prefix_(controller.url_prefix_), handlers_(controller.handlers_), middlewares_(controller.middlewares_) {}//
+	//! contructors wit url prefix
+	Controller(std::string url_prefix);
 
+	// Handle request if the request matched with caontroller routes
 	Response Handle(Request& request);
 
-	// check if the request will match with one of controller handlers
+	// check if the request will match with one of the controller routes
 	bool IsMatch(Request& request);
 
 protected:
 	typedef std::function<Response(Request&)> Handler;
-	typedef std::function<Response(Request&, Handler next)> MiddlewareHandler;
 
-	//! Register new Handler using class methods
-	void RegisterHandler(std::string url, Request::RequestMethod method, Handler Handler);
+	//! Add new Get route
+	Route& Get(std::string url, Handler handler);
 
-	//void RegisterMiddleware(MiddlewareHandler middleware);
-	void RegisterMiddleware(std::unique_ptr<Middleware> middleware);
+	//! Add new Post route
+	Route& Post(std::string url, Handler handler);
+
+	//! Add new Put route
+	Route& Put(std::string url, Handler handler);
+
+	//! Add new Patch route
+	Route& Patch(std::string url, Handler handler);
+
+	//! Add new Delete route
+	Route& Delete(std::string url, Handler handler);
+
+	Controller& AddMiddleware(std::unique_ptr<Middleware> middleware);
 
 	std::string url_prefix_;
 
 private:
-	friend Middleware;
-	typedef std::tuple<std::string, Request::RequestMethod, Handler> HandlerMatch;
-
 	Response CallHandler(Request& request);
-	bool IsMatch(Request& request, HandlerMatch& h);
 
-
-	std::vector<HandlerMatch> handlers_;
+	std::vector<Route> routes_;
 
 	std::unique_ptr<Middleware> middleware_chain_;
 };

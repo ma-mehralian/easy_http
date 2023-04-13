@@ -187,6 +187,31 @@ int Server::Stop() {
 	return 0;
 }
 
+Route& Server::Get(std::string url, Handler handler) {
+    routes_.push_back(Route::Get(url, handler));
+    return routes_.back();
+}
+
+Route& Server::Post(std::string url, Handler handler) {
+    routes_.push_back(Route::Post(url, handler));
+    return routes_.back();
+}
+
+Route& Server::Put(std::string url, Handler handler) {
+    routes_.push_back(Route::Put(url, handler));
+    return routes_.back();
+}
+
+Route& Server::Patch(std::string url, Handler handler) {
+    routes_.push_back(Route::Patch(url, handler));
+    return routes_.back();
+}
+
+Route& Server::Delete(std::string url, Handler handler) {
+    routes_.push_back(Route::Delete(url, handler));
+    return routes_.back();
+}
+
 void Server::RegisterController(std::unique_ptr<Controller> c) {
     controllers_.push_back(std::move(c));
 }
@@ -208,6 +233,12 @@ void Server::RequestHandler(evhttp_request* request, void* server_ptr) {
 }
 
 Response Server::RequestHandler(Request& request) {
+    // check route urls
+    for (auto& r : routes_)
+        if (request.UrlIs(r.Url()))
+            return r.CallHandler(request);
+
+    // check controller urls
     for (auto& c : controllers_)
         if (c->IsMatch(request))
 			return c->Handle(request);

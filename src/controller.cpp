@@ -1,40 +1,55 @@
 #include <easy_http/controller.h>
 #include <easy_http/middleware.h>
+#include <functional>
 
 using namespace std;
 	
 Controller::Controller(std::string url_prefix) : url_prefix_(url_prefix) {
 	if (url_prefix[0] != '/')
 		throw std::runtime_error("url prefix should be started with '/'");
-	middleware_chain_ = nullptr;
 }
 
 Response Controller::Handle(Request& request) {
-	if (middleware_chain_)
-		return middleware_chain_->CallHandler(request);
-	else
-		return this->CallHandler(request);
+	for (auto& r : routes_)
+		if (request.UrlIs(r.Url()))
+			r.CallHandler(request);
+	return Response(request, 404);
 }
 
-void Controller::RegisterHandler(std::string url, Request::RequestMethod method, Handler handler){
-	handlers_.push_back({url, method, handler});
+bool Controller::IsMatch(Request& request) {
+	for (auto& r : routes_)
+		if (request.UrlIs(r.Url()))
+			return true;
+	return false;
 }
 
-//void Controller::RegisterMiddleware(MiddlewareHandler middleware) {
-//	auto m = make_unique<Middleware>();
-//	m->controller_ = this;
-//	if (!middleware_chain_)
-//		middleware_chain_ = std::move(m);
-//	else { // add new middleware to the end of list
-//		auto last = middleware_chain_.get();
-//		while (last->next_ != nullptr)
-//			last = last->next_.get();
-//		last->next_ = std::move(middleware);
-//	}
-//}
+Route& Controller::Get(std::string url, Handler handler) {
+	routes_.push_back(Route::Get(url_prefix_ + url, handler));
+	return routes_.back();
+}
+
+Route& Controller::Post(std::string url, Handler handler) {
+	routes_.push_back(Route::Post(url_prefix_ + url, handler));
+	return routes_.back();
+}
+
+Route& Controller::Put(std::string url, Handler handler) {
+	routes_.push_back(Route::Put(url_prefix_ + url, handler));
+	return routes_.back();
+}
+
+Route& Controller::Patch(std::string url, Handler handler) {
+	routes_.push_back(Route::Patch(url_prefix_ + url, handler));
+	return routes_.back();
+}
+
+Route& Controller::Delete(std::string url, Handler handler) {
+	routes_.push_back(Route::Delete(url_prefix_ + url, handler));
+	return routes_.back();
+}
  
-void Controller::RegisterMiddleware(std::unique_ptr<Middleware> middleware) {
-	middleware->controller_ = this;
+Controller& Controller::AddMiddleware(std::unique_ptr<Middleware> middleware) {
+	middleware->last_ = bind(&Controller::Handle, this, placeholders::_1);
 	if (!middleware_chain_)
 		middleware_chain_ = std::move(middleware);
 	else { // add new middleware to the end of list
@@ -43,27 +58,12 @@ void Controller::RegisterMiddleware(std::unique_ptr<Middleware> middleware) {
 			last = last->next_.get();
 		last->next_ = std::move(middleware);
 	}
+	return *this;
 }
 
 Response Controller::CallHandler(Request& request) {
-	for (auto& h : handlers_)
-		if (IsMatch(request, h)) {
-			//std::vector<string> vars;
-			//request.UrlIs(url_prefix_ + std::get<0>(h), vars);
-			return std::get<2>(h)(request);
-		}
-	return Response(request, 404);
+	if (middleware_chain_)
+		return middleware_chain_->CallHandler(request);
+	else
+		return this->CallHandler(request);
 }
-
-bool Controller::IsMatch(Request& request) {
-	for (auto& h : handlers_)
-		if (IsMatch(request, h))
-			return true;
-	return false;
-}
-
-bool Controller::IsMatch(Request& request, HandlerMatch& h) {
-	return request.UrlIs(url_prefix_ + std::get<0>(h)) &&
-		request.Method() == std::get<1>(h);
-}
-

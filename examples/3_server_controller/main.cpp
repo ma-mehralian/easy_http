@@ -7,14 +7,12 @@ using namespace std;
 class MyController: public Controller {
 public:
 	MyController() {
-		RegisterHandler("test1", Request::RequestMethod::GET,
-			std::bind(&MyController::Test1, this, std::placeholders::_1));
-		RegisterHandler("test2", Request::RequestMethod::POST,
-			std::bind(&MyController::Test2, this, std::placeholders::_1));
+		Get("/test1", MyController::Test1);
+		Post("/test2", MyController::Test2);
 	}
 
 private:
-	Response Test1(Request& request) {
+	static Response Test1(Request& request) {
 		cout << "test1 called" << endl;
 		try {
 			Client c("http://127.0.0.1:4313");
@@ -32,7 +30,7 @@ private:
 
 	}
 
-	Response Test2(Request& request) {
+	static Response Test2(Request& request) {
 		cout << "test2 called" << endl;
 		string name = request.Query<string>("name", "no-name");
 		Response response(request, 200);
@@ -45,7 +43,7 @@ int main(int argn, char* argc[]) {
 	string ip = "0.0.0.0";
 	int port = 4000;
 	Server s(ip, port);
-	s.RegisterController(make_unique<MyController>());
+	s.RegisterController(make_unique<MyController>("/users"));
 	if (s.Start() != 0){
 		cout << "Cannot start HTTP server http://" << ip << ":" << port << endl;
 		return -1;
