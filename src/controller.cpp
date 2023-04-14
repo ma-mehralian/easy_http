@@ -12,7 +12,7 @@ Controller::Controller(std::string url_prefix) : url_prefix_(url_prefix) {
 Response Controller::Handle(Request& request) {
 	for (auto& r : routes_)
 		if (request.UrlIs(r.Url()) && request.Method() == r.Method())
-			r.CallHandler(request);
+			return r.CallHandler(request);
 	return Response(request, 404);
 }
 
@@ -40,5 +40,5 @@ Response Controller::CallHandler(Request& request) {
 	if (middleware_chain_)
 		return middleware_chain_->CallHandler(request);
 	else
-		return this->CallHandler(request);
+		return this->Handle(request);
 }

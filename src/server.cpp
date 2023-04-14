@@ -241,6 +241,6 @@ Response Server::RequestHandler(Request& request) {
     // check controller urls
     for (auto& c : controllers_)
         if (c->IsMatch(request))
-			return c->Handle(request);
+			return c->CallHandler(request);
 	return Response(request, 404);
 }
