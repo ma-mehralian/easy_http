@@ -7,5 +7,5 @@ Response Middleware::CallHandler(Request& request) {
 	if (next_)
 		return Handle(request, bind(&Middleware::CallHandler, next_.get(), placeholders::_1));
 	else
-		return last_(request);
+		return Handle(request, last_);
 }
