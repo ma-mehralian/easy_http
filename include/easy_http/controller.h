@@ -13,8 +13,9 @@ public:
 	Controller(std::string url_prefix);
 	virtual ~Controller() {}
 
-	// Handle request if the request matched with caontroller routes
-	Response Handle(Request& request);
+
+	// Handle request if the request matched with controller routes
+	Response CallHandler(Request& request);
 
 	// check if the request will match with one of the controller routes
 	bool IsMatch(Request& request);
@@ -74,7 +75,7 @@ protected:
 	std::string url_prefix_;
 
 private:
-	Response CallHandler(Request& request);
+	Response Handle(Request& request);
 
 	std::vector<Route> routes_;
 
