@@ -26,6 +26,8 @@ public:
 
 	const std::string Url() const { return url_; }
 
+	const Request::RequestMethod Method() const { return method_; }
+
 private:
 	Route(Request::RequestMethod method, std::string url, Handler handler)
 		: url_(url), method_(method), handler_(handler), middleware_chain_(nullptr) {}
