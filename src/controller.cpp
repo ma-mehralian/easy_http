@@ -11,14 +11,14 @@ Controller::Controller(std::string url_prefix) : url_prefix_(url_prefix) {
 
 Response Controller::Handle(Request& request) {
 	for (auto& r : routes_)
-		if (request.UrlIs(r.Url()))
+		if (request.UrlIs(r.Url()) && request.Method() == r.Method())
 			r.CallHandler(request);
 	return Response(request, 404);
 }
 
 bool Controller::IsMatch(Request& request) {
 	for (auto& r : routes_)
-		if (request.UrlIs(r.Url()))
+		if (request.UrlIs(r.Url()) && request.Method() == r.Method())
 			return true;
 	return false;
 }
