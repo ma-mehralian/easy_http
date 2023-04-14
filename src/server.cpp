@@ -30,7 +30,7 @@ Server::Server(const std::string& ip, int port) :
 	http_ip_(ip), http_port_(port),is_started_(false), e_base_(nullptr), e_http_server_(nullptr)
 {
 #ifdef USE_SPDLOG
-    logger_ = spdlog::create<spdlog::sinks::null_sink_st>("null_logger");
+    logger_ = spdlog::create<spdlog::sinks::null_sink_st>("server");
 #endif //USE_SPDLOG
 }
 
