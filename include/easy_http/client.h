@@ -21,10 +21,11 @@ public:
 	Request SendRequest(Request& request);
 
 	//! Send a new request with chuncked response
-	Request SendChunkedRequest(std::function<void(const Request&)> h, Request& request);
+	void SendChunkedRequest(std::function<void(const Request&)> h, Request& request);
 
 private:
 
+	void MakeAsyncRequest(Request& request);
 	Request MakeRequest(Request& request);
 
 	//! libevent request handler

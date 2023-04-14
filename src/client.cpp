@@ -83,20 +83,19 @@ Request Client::SendRequest(Request& request) {
     return MakeRequest(request);
 }
 
-Request Client::SendChunkedRequest(std::function<void(const Request&)> h, Request& request) {
+void Client::SendChunkedRequest(std::function<void(const Request&)> h, Request& request) {
     chunk_handler_ = h;
     evhttp_request_set_chunked_cb(request.evrequest_, &Client::ChunkedResponseHandler);
-    return MakeRequest(request);
+    return MakeAsyncRequest(request);
 }
 
-Request Client::MakeRequest(Request& request) {
+void Client::MakeAsyncRequest(Request& request) {
     error_code_ = -1;
     e_last_request_ = nullptr;
-    evhttp_request_set_error_cb(request.evrequest_, 
-		[](enum evhttp_request_error err_code, void* client_ptr) {
-			Client::ResponseErrorHandler(err_code, client_ptr);
-		});
-
+    evhttp_request_set_error_cb(request.evrequest_,
+        [](enum evhttp_request_error err_code, void* client_ptr) {
+            Client::ResponseErrorHandler(err_code, client_ptr);
+        });
     request.PushHeader("Host", http_ip_);
 
     evhttp_cmd_type m;
@@ -114,7 +113,11 @@ Request Client::MakeRequest(Request& request) {
     }
 #pragma pop_macro("DELETE")
     evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
-    event_base_dispatch(e_base_);
+}
+
+Request Client::MakeRequest(Request& request) {
+    MakeAsyncRequest(request);
+    int r = event_base_dispatch(e_base_);
     if (error_code_ != -1) {
         switch ((evhttp_request_error)error_code_)
         {
