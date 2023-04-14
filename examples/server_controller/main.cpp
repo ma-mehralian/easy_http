@@ -7,19 +7,19 @@ using namespace std;
 class MyController: public Controller {
 public:
 	MyController(std::string url_prefix) : Controller(url_prefix) {
-		Get("/test1", MyController::Test1);
-		Post("/test2", MyController::Test2);
+		Get("/test1", &MyController::Test1);
+		Post("/test2", &MyController::Test2);
 	}
 
 private:
-	static Response Test1(Request& request) {
+	Response Test1(Request& request) {
 		cout << "test1 called" << endl;
 		Response response(request, 200);
 		response.SetContent("Test1 callback");
 		return response;
 	}
 
-	static Response Test2(Request& request) {
+	Response Test2(Request& request) {
 		cout << "test2 called" << endl;
 		string name = request.Query<string>("name", "no-name");
 		Response response(request, 200);
