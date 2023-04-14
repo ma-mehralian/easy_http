@@ -22,31 +22,6 @@ bool Controller::IsMatch(Request& request) {
 			return true;
 	return false;
 }
-
-Route& Controller::Get(std::string url, Handler handler) {
-	routes_.push_back(Route::Get(url_prefix_ + url, handler));
-	return routes_.back();
-}
-
-Route& Controller::Post(std::string url, Handler handler) {
-	routes_.push_back(Route::Post(url_prefix_ + url, handler));
-	return routes_.back();
-}
-
-Route& Controller::Put(std::string url, Handler handler) {
-	routes_.push_back(Route::Put(url_prefix_ + url, handler));
-	return routes_.back();
-}
-
-Route& Controller::Patch(std::string url, Handler handler) {
-	routes_.push_back(Route::Patch(url_prefix_ + url, handler));
-	return routes_.back();
-}
-
-Route& Controller::Delete(std::string url, Handler handler) {
-	routes_.push_back(Route::Delete(url_prefix_ + url, handler));
-	return routes_.back();
-}
  
 Controller& Controller::AddMiddleware(std::unique_ptr<Middleware> middleware) {
 	middleware->last_ = bind(&Controller::Handle, this, placeholders::_1);
