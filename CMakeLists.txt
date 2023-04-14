@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 project(easy_http CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set_property( GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(USE_SPDLOG   "set ON to use spdlog" OFF)
 option(USE_JSON     "set ON to use nlohman json for json responses" OFF)
@@ -69,6 +70,6 @@ install(
 )
 
 # --- examples
-add_subdirectory("examples/1_simple_server")
-add_subdirectory("examples/2_simple_client")
-add_subdirectory("examples/3_server_controller")
+add_subdirectory("examples/client_hello_world")
+add_subdirectory("examples/server_hello_world")
+add_subdirectory("examples/server_controller")

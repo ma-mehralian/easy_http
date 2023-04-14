@@ -18,8 +18,9 @@ int main(int argn, char* argc[]) {
 
 		auto req2 = c.CreateRequest(Request::RequestMethod::GET, "/engine/live");
 		cout << "calling:" << req2.FullUrl() << endl;
-		auto res2 = c.SendChunkedRequest(h, req2);
-		cout << "response: " << res2.GetContent();
+		c.SendChunkedRequest(h, req2);
+		//cout << "response: " << res2.GetContent();
+		req2.Wait();
 	}
 	catch (const exception& e) {
 		cout << "request failed: " << e.what() << endl;

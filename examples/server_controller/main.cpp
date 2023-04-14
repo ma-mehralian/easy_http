@@ -6,7 +6,7 @@ using namespace std;
 
 class MyController: public Controller {
 public:
-	MyController() {
+	MyController(std::string url_prefix) : Controller(url_prefix) {
 		Get("/test1", MyController::Test1);
 		Post("/test2", MyController::Test2);
 	}
@@ -14,20 +14,9 @@ public:
 private:
 	static Response Test1(Request& request) {
 		cout << "test1 called" << endl;
-		try {
-			Client c("http://127.0.0.1:4313");
-			auto req = c.CreateRequest(Request::RequestMethod::GET, "/api/color_classes");
-			auto res = c.SendRequest(req);
-			Response response(request, 200, { {"Content-type", "application/json"} });
-			response.SetContent(res.GetContent());
-			return response;
-		}
-		catch (const exception& e) {
-			Response response(request, 500);
-			response.SetContent("Host not accessible");
-			return response;
-		}
-
+		Response response(request, 200);
+		response.SetContent("Test1 callback");
+		return response;
 	}
 
 	static Response Test2(Request& request) {
