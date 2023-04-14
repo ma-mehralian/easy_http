@@ -242,14 +242,14 @@ Request& Request::SetFileContent(std::string file_path) {
         auto mime = content_type_table.find(ext);
         if (mime != content_type_table.end())
             PushHeader("Content-type", mime->second);
-#ifdef NDEBUG
+//#ifdef NDEBUG
         //evbuffer_set_flags(response_buffer.get(), EVBUFFER_FLAG_DRAINS_TO_FD);
         int r = evbuffer_add_file(evhttp_request_get_output_buffer(evrequest_), fd, 0, size);
         if (r != 0)
             throw std::runtime_error("Cannot add file content to buffer");
-#else
+//#else
         //#warning this line will not work with release binary!
-#endif
+//#endif
     }
     else
         throw std::runtime_error("Cannot open file");
