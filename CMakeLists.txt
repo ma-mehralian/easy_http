@@ -72,4 +72,5 @@ install(
 # --- examples
 add_subdirectory("examples/client_hello_world")
 add_subdirectory("examples/server_hello_world")
+add_subdirectory("examples/server_middleware")
 add_subdirectory("examples/server_controller")
