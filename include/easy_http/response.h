@@ -11,7 +11,7 @@ class Response {
 public:
 	typedef std::map<std::string, std::string> HeaderList;
 	//! constructor
-	Response(Request& request, int status = 200, HeaderList headers = HeaderList());
+	Response(Request request, int status = 200, HeaderList headers = HeaderList());
 	Response(const Response& response);
 	Response(Response&& response);
 	Response& operator=(const Response& response);
@@ -57,7 +57,7 @@ public:
 	int Send();
 
 protected:
-	Request& request_;
+	Request request_;
 	int status_code_;
 };
 

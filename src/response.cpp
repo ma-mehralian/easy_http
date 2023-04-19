@@ -6,7 +6,7 @@
 
 using namespace std;
 
-Response::Response(Request& request, int status, HeaderList headers): request_(request){
+Response::Response(Request request, int status, HeaderList headers): request_(request){
 	SetStatusCode(status).SetHeaders(headers);
 }
 
