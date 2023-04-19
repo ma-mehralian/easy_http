@@ -22,6 +22,8 @@ Client::Client(const std::string& ip, int port)
 
 Client::Client(const std::string& url) : e_last_request_(0) {
     auto uri = evhttp_uri_parse(url.c_str());
+    if (!uri)
+        throw runtime_error("Cannot pars client URL!");
     http_port_ = evhttp_uri_get_port(uri);
     http_ip_ = evhttp_uri_get_host(uri) ? string(evhttp_uri_get_host(uri)) : "";
     evhttp_uri_free(uri);
@@ -58,7 +60,29 @@ void Client::Init() {
     //evhttp_connection_set_timeout(e_conn_, 5);
 }
 
-Request Client::CreateRequest(Request::RequestMethod method, std::string path, const HeaderList& headers) {
+Request Client::Get(std::string path, Handler handler, bool is_chunked) {
+    return CreateRequest(Request::RequestMethod::GET, path, handler, is_chunked);
+}
+
+Request Client::Post(std::string path, Handler handler, bool is_chunked) {
+    return CreateRequest(Request::RequestMethod::POST, path, handler, is_chunked);
+}
+
+Request Client::Put(std::string path, Handler handler, bool is_chunked) {
+    return CreateRequest(Request::RequestMethod::PUT, path, handler, is_chunked);
+}
+
+Request Client::Patch(std::string path, Handler handler, bool is_chunked) {
+    return CreateRequest(Request::RequestMethod::PATCH, path, handler, is_chunked);
+}
+
+Request Client::Delete(std::string path, Handler handler, bool is_chunked) {
+#undef DELETE
+    return CreateRequest(Request::RequestMethod::DELETE, path, handler, is_chunked);
+#pragma pop_macro("DELETE")
+}
+
+Request Client::CreateRequest(Request::RequestMethod method, std::string path, Handler handler, bool is_chunked) {
     char buf[URL_MAX];
     int r = 0;
     auto uri = evhttp_uri_parse(path.c_str());
@@ -72,32 +96,60 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, c
     }
     evhttp_uri_free(uri);
     string url(buf);
-    auto req = evhttp_request_new(&Client::ResponseHandler, this);
+    struct HandleContainer { Handler handler; event_base* e_base; };
+    auto cont = new HandleContainer{ handler, e_base_ };
+    auto req = evhttp_request_new(
+        [](evhttp_request* request, void* handle_ptr) {
+            auto cont = static_cast<HandleContainer*>(handle_ptr);
+            cont->handler(Response(Request(request), evhttp_request_get_response_code(request)));
+            event_base_loopbreak(cont->e_base);
+            free(cont);
+        }, cont);
+    if (is_chunked)
+        evhttp_request_set_chunked_cb(req,
+            [](evhttp_request* request, void* handle_ptr) {
+                auto cont = static_cast<HandleContainer*>(handle_ptr);
+                cont->handler(Response(Request(request), evhttp_request_get_response_code(request)));
+            });
+    //evhttp_request_set_on_complete_cb(req,
+    //    [](evhttp_request* request, void* handle_ptr) {
+    //        auto cont = static_cast<HandleContainer*>(handle_ptr);
+    //        free(cont);
+    //    }, cont);
+    evhttp_request_set_error_cb(req,
+        [](enum evhttp_request_error err_code, void* handle_ptr) {
+            auto cont = static_cast<HandleContainer*>(handle_ptr);
+            free(cont);
+            switch (err_code)
+            {
+            case EVREQ_HTTP_TIMEOUT:
+                throw runtime_error("Request timeout");
+                break;
+            case EVREQ_HTTP_EOF:
+                throw runtime_error("Request EOF");
+                break;
+            case EVREQ_HTTP_INVALID_HEADER:
+                throw runtime_error("Request invalid header");
+                break;
+            case EVREQ_HTTP_BUFFER_ERROR:
+                throw runtime_error("Request buffer error");
+                break;
+            case EVREQ_HTTP_REQUEST_CANCEL:
+                throw runtime_error("Request cancel");
+                break;
+            case EVREQ_HTTP_DATA_TOO_LONG:
+                throw runtime_error("Request data too long");
+                break;
+            default:
+                break;
+            }
+        });
     Request request(req, method, url);
-    request.SetHeaders(headers);
+    request.PushHeader("Host", http_ip_);
     return request;
 }
 
-Request Client::SendRequest(Request& request) {
-    chunk_handler_ = nullptr;
-    return MakeRequest(request);
-}
-
-void Client::SendChunkedRequest(std::function<void(const Request&)> h, Request& request) {
-    chunk_handler_ = h;
-    evhttp_request_set_chunked_cb(request.evrequest_, &Client::ChunkedResponseHandler);
-    return MakeAsyncRequest(request);
-}
-
-void Client::MakeAsyncRequest(Request& request) {
-    error_code_ = -1;
-    e_last_request_ = nullptr;
-    evhttp_request_set_error_cb(request.evrequest_,
-        [](enum evhttp_request_error err_code, void* client_ptr) {
-            Client::ResponseErrorHandler(err_code, client_ptr);
-        });
-    request.PushHeader("Host", http_ip_);
-
+void Client::SendAsyncRequest(Request& request) {
     evhttp_cmd_type m;
 #undef DELETE
     switch (request.Method()) {
@@ -115,56 +167,7 @@ void Client::MakeAsyncRequest(Request& request) {
     evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
 }
 
-Request Client::MakeRequest(Request& request) {
-    MakeAsyncRequest(request);
+void Client::SendRequest(Request& request) {
+    Client::SendAsyncRequest(request);
     int r = event_base_dispatch(e_base_);
-    if (error_code_ != -1) {
-        switch ((evhttp_request_error)error_code_)
-        {
-        case EVREQ_HTTP_TIMEOUT:
-            throw runtime_error("Request timeout");
-            break;
-        case EVREQ_HTTP_EOF:
-            throw runtime_error("Request EOF");
-            break;
-        case EVREQ_HTTP_INVALID_HEADER:
-            throw runtime_error("Request invalid header");
-            break;
-        case EVREQ_HTTP_BUFFER_ERROR:
-            throw runtime_error("Request buffer error");
-            break;
-        case EVREQ_HTTP_REQUEST_CANCEL:
-            throw runtime_error("Request cancel");
-            break;
-        case EVREQ_HTTP_DATA_TOO_LONG:
-            throw runtime_error("Request data too long");
-            break;
-        default:
-            break;
-        }
-    }
-    if (!e_last_request_)
-        throw runtime_error("Request failed");
-    else{
-		return Request(e_last_request_);
-    }
-}
-
-void Client::ResponseHandler(evhttp_request* request, void* client_ptr) {
-    auto client = static_cast<Client*>(client_ptr);
-    client->e_last_request_ = request;
-    if(request)
-        evhttp_request_own(request);
-    event_base_loopbreak(client->e_base_);
-}
-
-void Client::ChunkedResponseHandler(struct evhttp_request* request, void* client_ptr) {
-    auto client = static_cast<Client*>(client_ptr);
-    if (client->chunk_handler_) 
-        client->chunk_handler_(Request(request));
-}
-
-void Client::ResponseErrorHandler(int err_code, void* client_ptr) {
-    auto client = static_cast<Client*>(client_ptr);
-    client->error_code_ = err_code;
 }

@@ -6,20 +6,23 @@ using namespace std;
 
 int main(int argn, char* argc[]) {
 	Client c("127.0.0.1", 4110);
-	auto h = [](const Request& request) {
-		printf("new chunk:\n %s \n", request.GetContent().c_str());
-	};
 
 	try {
-		auto req1 = c.CreateRequest(Request::RequestMethod::POST, "/engine?service=start");
+		auto req1 = c.Post("/engine?service=start",
+			[](const Response& res) {
+				cout << "response[" << res.GetStatusCode() << "]: " << res.GetContent() << endl;
+			});
 		cout << "calling:" << req1.FullUrl() << endl;
-		auto res1 = c.SendRequest(req1);
-		cout << "response: " << res1.GetContent() << endl;
+		c.SendRequest(req1);
 
-		auto req2 = c.CreateRequest(Request::RequestMethod::GET, "/engine/live");
+		auto req2 = c.Get("/engine/live",
+			[](const Response& res) {
+				cout << "chunked_response[" << res.GetStatusCode() << "]: " << res.GetContent().substr(0,50) << endl;
+			}, true);
 		cout << "calling:" << req2.FullUrl() << endl;
-		c.SendChunkedRequest(h, req2);
-		//cout << "response: " << res2.GetContent();
+		c.SendAsyncRequest(req2);
+
+		printf("Request sent...");
 		req2.Wait();
 	}
 	catch (const exception& e) {
