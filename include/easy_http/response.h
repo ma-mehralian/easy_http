@@ -13,7 +13,9 @@ public:
 	//! constructor
 	Response(Request& request, int status = 200, HeaderList headers = HeaderList());
 	Response(const Response& response);
+	Response(Response&& response);
 	Response& operator=(const Response& response);
+	Response& operator=(Response&& response);
 
 	~Response();
 

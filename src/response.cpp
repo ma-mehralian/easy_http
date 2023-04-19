@@ -11,11 +11,27 @@ Response::Response(Request& request, int status, HeaderList headers): request_(r
 }
 
 Response::Response(const Response& response) : request_(response.request_) {
-	this->operator=(response);
+	status_code_ = response.status_code_;
+}
+
+Response::Response(Response&& response): request_(std::move(response.request_)) {
+	status_code_ = response.status_code_;
 }
 
 Response& Response::operator=(const Response& response) {
+	if (this == &response)
+		return *this;
+
 	request_ = response.request_;
+	status_code_ = response.status_code_;
+	return *this;
+}
+
+Response& Response::operator=(Response&& response) {
+	if (this == &response)
+		return *this;
+
+	request_ = std::move(response.request_);
 	status_code_ = response.status_code_;
 	return *this;
 }
