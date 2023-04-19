@@ -44,6 +44,49 @@ const std::map<string, string> content_type_table = {
     { ".ps", "application/postscript" },
 };
 
+Request::Request(const Request& req) {
+	*this = req;
+}
+
+Request::Request(Request&& req) {
+    *this = std::move(req);
+}
+
+Request& Request::operator=(const Request& req) {
+	if (this == &req)
+		return *this;
+
+    this->type_ = req.type_;
+    this->method_ = req.method_;
+    this->evrequest_ = req.evrequest_;
+    this->client_ip_ = req.client_ip_;
+    this->client_port_ = req.client_port_;
+    this->uri_ = req.uri_;
+    this->input_headers_ = req.input_headers_;
+    this->output_headers_ = req.output_headers_;
+    this->is_chunked_ = req.is_chunked_;
+    this->chunk_callback_ = req.chunk_callback_;
+    return *this;
+}
+
+Request& Request::operator=(Request&& req) {
+	if (this == &req)
+		return *this;
+
+    this->type_ = req.type_;
+    this->method_ = req.method_;
+    this->evrequest_ = req.evrequest_;
+    this->client_ip_ = req.client_ip_;
+    this->client_port_ = req.client_port_;
+    this->uri_ = req.uri_;
+    this->input_headers_ = std::move(req.input_headers_);
+    this->output_headers_ = std::move(req.output_headers_);
+    this->is_chunked_ = req.is_chunked_;
+    this->chunk_callback_ = std::move(req.chunk_callback_);
+    req.evrequest_ = nullptr;
+    return *this;
+}
+
 Request::Request(evhttp_request* request) : evrequest_(request), type_(RequestType::RESPONSE) {
 #pragma push_macro("DELETE")
 #undef DELETE
@@ -119,7 +162,7 @@ Request::Request(evhttp_request* request) : evrequest_(request), type_(RequestTy
 Request::Request(evhttp_request* request, Request::RequestMethod method, std::string url)
 	:evrequest_(request), method_(method), type_(RequestType::REQUEST)
 {
-    ParsUri(url);
+	ParsUri(url);
 }
 
 Request::~Request() {

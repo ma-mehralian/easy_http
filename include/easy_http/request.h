@@ -25,6 +25,16 @@ public:
 	//! constructor for a sending request (used for Client)
 	Request(evhttp_request* request, Request::RequestMethod method, std::string url);
 
+
+	//copy constructor
+	Request(const Request& req);
+
+	// move constructor
+	Request(Request&& req);
+
+	Request& operator=(const Request& req);
+	Request& operator=(Request&& req);
+
 	~Request();
 
 	Request& SetChunkCallback(std::function<bool(std::string&)> func);
@@ -101,7 +111,6 @@ public:
 protected:
 	friend class Response;
 	friend class Client;
-
 
 	//! reply the received request (this function is called in Response class)
 	void Reply(int status_code);
