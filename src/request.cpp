@@ -102,8 +102,9 @@ Request::Request(evhttp_request* request) : evrequest_(request), type_(RequestTy
 		}
 #endif
 	}
-
-    ParsUri(evhttp_request_get_uri(request));
+	auto uri = evhttp_request_get_uri(request);
+	if (uri)
+		ParsUri(uri);
 
     // read request headers
     //event_ptr<evkeyvalq> headers(evhttp_request_get_input_headers(request));
@@ -122,8 +123,7 @@ Request::Request(evhttp_request* request, Request::RequestMethod method, std::st
 }
 
 Request::~Request() {
-    if (evhttp_request_is_owned(evrequest_))
-        evhttp_request_free(evrequest_);
+
 }
 
 struct chunk_req_state {
@@ -342,7 +342,8 @@ void Request::ParsUri(std::string url) {
             q_keyval = q_keyval->next.tqe_next;
         }
 #endif
-    }
+    }else
+        throw runtime_error("Invalid URL");
 }
 
 //--- utils functions
