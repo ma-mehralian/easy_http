@@ -44,7 +44,7 @@ const std::map<string, string> content_type_table = {
     { ".ps", "application/postscript" },
 };
 
-Request::Request(evhttp_request* request) : evrequest_(request) {
+Request::Request(evhttp_request* request) : evrequest_(request), type_(RequestType::RESPONSE) {
 #pragma push_macro("DELETE")
 #undef DELETE
     // read reaquest type
@@ -116,7 +116,7 @@ Request::Request(evhttp_request* request) : evrequest_(request) {
 }
 
 Request::Request(evhttp_request* request, Request::RequestMethod method, std::string url)
-	:evrequest_(request), method_(method)
+	:evrequest_(request), method_(method), type_(RequestType::REQUEST)
 {
     ParsUri(url);
 }

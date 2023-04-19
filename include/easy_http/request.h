@@ -109,6 +109,8 @@ protected:
 	evhttp_request* evrequest_;
 
 private:
+	enum RequestType { REQUEST, RESPONSE } type_;
+
 	//scheme://[[userinfo]@]foo.com[:port]]/[path][?query][#fragment]
 	struct Uri {
 		std::string scheme;
