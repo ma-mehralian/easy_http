@@ -39,7 +39,11 @@ Response& Response::operator=(Response&& response) {
 Response::~Response() {
 }
 
-Response& Response::SetContent(std::string content) {
+const std::string Response::GetContent() const {
+	return request_.GetContent();
+}
+
+Response& Response::SetContent(const std::string content) {
 	request_.SetContent(content);
 	return *this; 
 }

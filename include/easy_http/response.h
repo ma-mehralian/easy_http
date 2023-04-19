@@ -19,8 +19,11 @@ public:
 
 	~Response();
 
+	//! get response content
+	const std::string GetContent() const;
+
 	//! set response content
-	Response& SetContent(std::string content);
+	Response& SetContent(const std::string content);
 
 	//! set handler for chunked response
 	Response& SetChunkCallback(std::function<bool(std::string&)> func);
