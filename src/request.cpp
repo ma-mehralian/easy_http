@@ -343,14 +343,15 @@ void Request::ParsUri(std::string url) {
     //event_ptr<const evhttp_uri> e_uri(evhttp_request_get_evhttp_uri(request));
     event_ptr<evhttp_uri> e_uri(evhttp_uri_parse(url.c_str()));
     if (e_uri != nullptr) {
+        auto s = evhttp_uridecode(evhttp_uri_get_path(e_uri.get()), 0, NULL);
         //uri_.full_path = evhttp_request_get_uri(request) ? string(evhttp_uridecode(evhttp_request_get_uri(request), 0, NULL)) : "";
-        uri_.path = evhttp_uri_get_path(e_uri.get()) ? string(evhttp_uridecode(evhttp_uri_get_path(e_uri.get()), 0, NULL)) : "";
+        uri_.path = evhttp_uri_get_path(e_uri.get()) ? string(s) : "";
         uri_.scheme = evhttp_uri_get_scheme(e_uri.get()) ? string(evhttp_uri_get_scheme(e_uri.get())) : "";
         uri_.userinfo = evhttp_uri_get_userinfo(e_uri.get()) ? string(evhttp_uri_get_userinfo(e_uri.get())) : "";
         uri_.port = evhttp_uri_get_port(e_uri.get());
         uri_.fragment = evhttp_uri_get_fragment(e_uri.get()) ? string(evhttp_uri_get_fragment(e_uri.get())) : "";
         uri_.host = evhttp_uri_get_host(e_uri.get()) ? string(evhttp_uri_get_host(e_uri.get())) : "";
-
+        free(s);
         //--- read request query string
 #if 1
         auto qury_char = evhttp_uri_get_query(e_uri.get());
@@ -360,8 +361,12 @@ void Request::ParsUri(std::string url) {
             auto words_begin = std::sregex_iterator(query_str.begin(), query_str.end(), pattern);
             auto words_end = std::sregex_iterator();
             for (std::sregex_iterator i = words_begin; i != words_end; i++) {
-                std::string key = evhttp_uridecode((*i)[1].str().c_str(), 0, NULL);
-                std::string value = evhttp_uridecode((*i)[2].str().c_str(), 0, NULL);
+				char* k = evhttp_uridecode((*i)[1].str().c_str(), 0, NULL);
+				char* v = evhttp_uridecode((*i)[2].str().c_str(), 0, NULL);
+				std::string key(k);
+				std::string value(v);
+                free(k);
+                free(v);
                 //--- array params
                 if (key.size() > 2 && key.substr(key.size() - 2) == "[]") {
                     key = key.substr(0, key.size() - 2);
