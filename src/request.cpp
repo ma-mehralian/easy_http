@@ -63,7 +63,6 @@ Request& Request::operator=(const Request& req) {
     this->client_port_ = req.client_port_;
     this->uri_ = req.uri_;
     this->input_headers_ = req.input_headers_;
-    this->output_headers_ = req.output_headers_;
     this->is_chunked_ = req.is_chunked_;
     this->chunk_callback_ = req.chunk_callback_;
     return *this;
@@ -80,7 +79,6 @@ Request& Request::operator=(Request&& req) {
     this->client_port_ = req.client_port_;
     this->uri_ = req.uri_;
     this->input_headers_ = std::move(req.input_headers_);
-    this->output_headers_ = std::move(req.output_headers_);
     this->is_chunked_ = req.is_chunked_;
     this->chunk_callback_ = std::move(req.chunk_callback_);
     req.evrequest_ = nullptr;
@@ -213,13 +211,7 @@ void Request::Reply(int status_code) {
             "Content-Type, Access-Control-Allow-Headers, "
             "Access-Control-Request-Method, Access-Control-Request-Headers"}
     };
-    for (auto& h : default_headers)
-        evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
-            h.first.c_str(), h.second.c_str());
-
-    for (auto& h : output_headers_)
-        evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
-            h.first.c_str(), h.second.c_str());
+    PushHeader(default_headers);
 
     if (!is_chunked_)
         evhttp_send_reply(evrequest_, status_code, "ok", evhttp_request_get_output_buffer(evrequest_));
@@ -300,14 +292,19 @@ Request& Request::SetFileContent(std::string file_path) {
 }
 
 
-Request& Request::PushHeader(std::string key, std::string value) { 
-    output_headers_[key] = value;
+Request& Request::PushHeader(const std::string& key, const std::string& value) {
+	int r = evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
+		key.c_str(), value.c_str());
+    if (r != 0)
+        throw runtime_error("Cannot set header " + key);
     return *this;
 }
 
 
-Request& Request::SetHeaders(const HeaderList& headers) { 
-    output_headers_ = headers; 
+Request& Request::PushHeader(const HeaderList& headers) {
+    for (auto& h : headers)
+        evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
+            h.first.c_str(), h.second.c_str());
     return *this;
 }
 

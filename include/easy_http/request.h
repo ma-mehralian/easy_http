@@ -66,8 +66,11 @@ public:
 	//! Determine if the request contains a non-empty value for an input item.
 	bool QueryFilled(std::string key) const { return IsFilled(uri_.query, key); }
 
-	//! add new header to sending request headers
-	Request& PushHeader(std::string key, std::string value);
+	//! Push the header to sending request headers
+	Request& PushHeader(const std::string& key, const std::string& value);
+
+	//! Push multiple headers to sending request headers
+	Request& PushHeader(const HeaderList& headers);
 
 	//! Retrieve a headers list from the received request.
 	const HeaderList& Headers() const { return input_headers_; }
@@ -135,7 +138,6 @@ private:
 	std::string client_ip_;
 	int client_port_;
 	HeaderList input_headers_;
-	HeaderList output_headers_;
 	//-- chunck
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;

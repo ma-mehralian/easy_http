@@ -54,7 +54,7 @@ Response& Response::SetChunkCallback(std::function<bool(std::string&)> func) {
 }
 
 Response& Response::SetHeaders(const HeaderList& headers) { 
-	request_.SetHeaders(headers);
+	request_.PushHeader(headers);
 	return *this; 
 }
 
