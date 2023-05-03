@@ -41,6 +41,7 @@ private:
 
 	std::string http_ip_;
 	uint16_t http_port_;
+	std::string http_scheme_;
 	int error_code_;
 
 	struct evhttp_request* e_last_request_;

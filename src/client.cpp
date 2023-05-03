@@ -15,7 +15,7 @@
 using namespace std;
 
 Client::Client(const std::string& ip, int port)
-    : http_ip_(ip), http_port_(port), e_last_request_(0) 
+    : http_ip_(ip), http_port_(port), http_scheme_("http"), e_last_request_(0)
 {
     Init();
 }
@@ -26,6 +26,7 @@ Client::Client(const std::string& url) : e_last_request_(0) {
         throw runtime_error("Cannot pars client URL!");
     http_port_ = evhttp_uri_get_port(uri);
     http_ip_ = evhttp_uri_get_host(uri) ? string(evhttp_uri_get_host(uri)) : "";
+    http_scheme_ = evhttp_uri_get_scheme(uri) ? string(evhttp_uri_get_scheme(uri)) : "";
     evhttp_uri_free(uri);
     Init();
 }
@@ -90,6 +91,7 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, H
         throw runtime_error("Invalid path");
     r += evhttp_uri_set_host(uri, http_ip_.c_str());
     r += evhttp_uri_set_port(uri, http_port_);
+    r += evhttp_uri_set_scheme(uri, http_scheme_.c_str());
     if (r < 0 || !evhttp_uri_join(uri, buf, URL_MAX)) {
         evhttp_uri_free(uri);
         throw runtime_error("Invalid ip or port");
