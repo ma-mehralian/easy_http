@@ -203,7 +203,7 @@ http_chunked_trickle_cb(evutil_socket_t fd, short events, void* arg) {
 
 void Request::Reply(int status_code) {
     //--- add headers
-    HeaderList default_headers = {
+    ParamList default_headers = {
         {"Access-Control-Allow-Origin", "*"},
         {"Access-Control-Allow-Credentials", "true"},
         {"Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"},
@@ -301,7 +301,7 @@ Request& Request::PushHeader(const std::string& key, const std::string& value) {
 }
 
 
-Request& Request::PushHeader(const HeaderList& headers) {
+Request& Request::PushHeader(const ParamList& headers) {
     for (auto& h : headers)
         evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
             h.first.c_str(), h.second.c_str());

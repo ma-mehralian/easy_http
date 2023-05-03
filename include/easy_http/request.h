@@ -17,7 +17,7 @@ struct evhttp_request;
 class Request {
 public:
 	enum class RequestMethod { GET, POST, HEAD, PUT, DELETE, OPTIONS, TRACE, CONNECT, PATCH };
-	typedef std::map<std::string, std::string> HeaderList;
+	typedef std::map<std::string, std::string> ParamList;
 
 	//! constructor for the received request (used for Server)
 	Request(evhttp_request* request);
@@ -70,10 +70,10 @@ public:
 	Request& PushHeader(const std::string& key, const std::string& value);
 
 	//! Push multiple headers to sending request headers
-	Request& PushHeader(const HeaderList& headers);
+	Request& PushHeader(const ParamList& headers);
 
 	//! Retrieve a headers list from the received request.
-	const HeaderList& Headers() const { return input_headers_; }
+	const ParamList& Headers() const { return input_headers_; }
 
 	//!Retrieve a header from the received request.
 	template <typename T>
@@ -130,14 +130,14 @@ private:
 		int port;
 		std::string path;
 		std::string full_path;
-		std::map<std::string, std::string> query;
+		ParamList query;
 		std::string fragment;
 		std::string host;
 	} uri_;
 	RequestMethod method_;
 	std::string client_ip_;
 	int client_port_;
-	HeaderList input_headers_;
+	ParamList input_headers_;
 	//-- chunck
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;
