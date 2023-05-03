@@ -69,8 +69,8 @@ public:
 	//! add new header to sending request headers
 	Request& PushHeader(std::string key, std::string value);
 
-	//! set sending request headers
-	Request& SetHeaders(const HeaderList& headers);
+	//! Retrieve a headers list from the received request.
+	const HeaderList& Headers() const { return input_headers_; }
 
 	//!Retrieve a header from the received request.
 	template <typename T>
