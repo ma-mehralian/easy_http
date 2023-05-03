@@ -11,7 +11,13 @@ Response Test1(Request& request) {
 }
 
 Response Test2(Request& request) {
-	cout << "test2 called" << endl;
+	printf("test2 called\n");
+	printf("Headers:\n");
+	for (const auto& h : request.Headers())
+		printf("  [H] '%s':'%s'\n", h.first.c_str(), h.second.c_str());
+	printf("Queries:\n");
+	for (const auto& q : request.Queries())
+		printf("  [P] '%s':'%s'\n", q.first.c_str(), q.second.c_str());
 	string name = request.Query<string>("name", "no-name");
 	Response response(request, 200);
 	response.SetContent("Hello " + name);
