@@ -56,6 +56,12 @@ void Client::Init() {
     if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
         throw runtime_error("could not init sockets!");
 #endif
+    // create http_host_
+	http_host_ = http_ip_;
+	if (http_port_ > 0)
+		http_host_ += ":" + to_string(http_port_);
+
+    // start connection
     e_base_ = event_base_new();
     e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
     //evhttp_connection_set_timeout(e_conn_, 5);
@@ -147,7 +153,7 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, H
             }
         });
     Request request(req, method, url);
-    request.PushHeader("Host", http_ip_);
+    request.PushHeader("Host", http_host_);
     return request;
 }
 
