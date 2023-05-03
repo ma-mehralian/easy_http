@@ -63,6 +63,8 @@ public:
 	template <typename T>
 	T Query(std::string key, T default_value = T()) const { return GetVal<T>(uri_.query, key, default_value); }
 
+	const ParamList& Queries() const { return uri_.query; }
+
 	//! Determine if the request contains a non-empty value for an input item.
 	bool QueryFilled(std::string key) const { return IsFilled(uri_.query, key); }
 
