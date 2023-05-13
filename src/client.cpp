@@ -63,7 +63,6 @@ void Client::Init() {
 
     // start connection
     e_base_ = event_base_new();
-    e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
     //evhttp_connection_set_timeout(e_conn_, 5);
 }
 
@@ -110,7 +109,7 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, H
         [](evhttp_request* request, void* handle_ptr) {
             auto cont = static_cast<HandleContainer*>(handle_ptr);
             cont->handler(Response(Request(request), evhttp_request_get_response_code(request)));
-            event_base_loopbreak(cont->e_base);
+            event_base_loopexit(cont->e_base, NULL);
             free(cont);
         }, cont);
     if (is_chunked)
@@ -119,11 +118,6 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, H
                 auto cont = static_cast<HandleContainer*>(handle_ptr);
                 cont->handler(Response(Request(request), evhttp_request_get_response_code(request)));
             });
-    //evhttp_request_set_on_complete_cb(req,
-    //    [](evhttp_request* request, void* handle_ptr) {
-    //        auto cont = static_cast<HandleContainer*>(handle_ptr);
-    //        free(cont);
-    //    }, cont);
     evhttp_request_set_error_cb(req,
         [](enum evhttp_request_error err_code, void* handle_ptr) {
             auto cont = static_cast<HandleContainer*>(handle_ptr);
@@ -172,7 +166,10 @@ void Client::SendAsyncRequest(Request& request) {
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
+    e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
+    evhttp_connection_free_on_completion(e_conn_);
     evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
+    e_conn_ = NULL;
 }
 
 void Client::SendRequest(Request& request) {
