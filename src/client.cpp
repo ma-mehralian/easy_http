@@ -64,6 +64,7 @@ void Client::Init() {
     // start connection
     e_base_ = event_base_new();
     //evhttp_connection_set_timeout(e_conn_, 5);
+    //event_enable_debug_logging(EVENT_DBG_ALL);
 }
 
 Request Client::Get(std::string path, Handler handler, bool is_chunked) {
