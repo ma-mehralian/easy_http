@@ -28,6 +28,16 @@ public:
 
 	const Request::RequestMethod Method() const { return method_; }
 
+	template<class T>
+	std::enable_if_t<std::is_base_of<Middleware, T>::value, T*>
+	GetMiddlewareByType() {
+		if (!middleware_chain_) return nullptr;
+		auto last = middleware_chain_.get();
+		while (typeid(T) != typeid(*last) && last != nullptr)
+			last = last->next_.get();
+		return last ? static_cast<T*>(last) : last;
+	}
+
 private:
 	Route(Request::RequestMethod method, std::string url, Handler handler)
 		: url_(url), method_(method), handler_(handler), middleware_chain_(nullptr) {}
