@@ -47,6 +47,7 @@ private:
 
 	struct evhttp_request* e_last_request_;
 	struct event_base* e_base_;
+	struct evdns_base* e_dns_;
 	struct evhttp_connection* e_conn_;
 };
 

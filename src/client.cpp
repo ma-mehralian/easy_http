@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <event2/event.h>
 #include <event2/http.h>
+#include <event2/dns.h>
 
 #ifdef EVENT__HAVE_SYS_UN_H
 #include <sys/un.h>
@@ -39,6 +40,8 @@ Client::~Client() {
 #endif
     if (e_conn_)
         evhttp_connection_free(e_conn_);
+    if (e_dns_)
+        evdns_base_free(e_dns_, 0);
     if (e_base_)
         event_base_free(e_base_);
 }
@@ -63,6 +66,8 @@ void Client::Init() {
 
     // start connection
     e_base_ = event_base_new();
+    e_dns_ = evdns_base_new(e_base_, 1);
+
     //evhttp_connection_set_timeout(e_conn_, 5);
     //event_enable_debug_logging(EVENT_DBG_ALL);
 }
@@ -167,7 +172,7 @@ void Client::SendAsyncRequest(Request& request) {
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
-    e_conn_ = evhttp_connection_base_new(e_base_, NULL, http_ip_.c_str(), http_port_);
+    e_conn_ = evhttp_connection_base_new(e_base_, e_dns_, http_ip_.c_str(), http_port_);
     evhttp_connection_free_on_completion(e_conn_);
     evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
     e_conn_ = NULL;
