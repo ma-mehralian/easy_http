@@ -345,7 +345,7 @@ void Request::ParsUri(std::string url) {
         uri_.path = evhttp_uri_get_path(e_uri.get()) ? string(s) : "";
         uri_.scheme = evhttp_uri_get_scheme(e_uri.get()) ? string(evhttp_uri_get_scheme(e_uri.get())) : "";
         uri_.userinfo = evhttp_uri_get_userinfo(e_uri.get()) ? string(evhttp_uri_get_userinfo(e_uri.get())) : "";
-        uri_.port = evhttp_uri_get_port(e_uri.get());
+        uri_.port = evhttp_uri_get_port(e_uri.get()) > 0 ? evhttp_uri_get_port(e_uri.get()) : 80;
         uri_.fragment = evhttp_uri_get_fragment(e_uri.get()) ? string(evhttp_uri_get_fragment(e_uri.get())) : "";
         uri_.host = evhttp_uri_get_host(e_uri.get()) ? string(evhttp_uri_get_host(e_uri.get())) : "";
         free(s);
