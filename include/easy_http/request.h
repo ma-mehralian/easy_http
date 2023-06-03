@@ -88,7 +88,7 @@ public:
 	const std::string& ClientIp() const { return client_ip_; }
 
 	//! Get the client port.
-	int ClientPort() const { return client_port_; }
+	int ClientPort() const { return uri_.port; } //TODO: vs client_port_
 
 	const std::string& Host() const { return uri_.host; }
 
