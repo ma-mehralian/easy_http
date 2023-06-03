@@ -15,19 +15,29 @@
 
 using namespace std;
 
-Client::Client(const std::string& ip, int port)
-    : http_ip_(ip), http_port_(port), http_scheme_("http"), e_last_request_(0)
-{
+Client::Client(const std::string& ip, int port){
+    char buf[URL_MAX];
+    int r = 0;
+    auto uri = evhttp_uri_new();
+    r += evhttp_uri_set_host(uri, ip.c_str());
+    r += evhttp_uri_set_port(uri, port);
+    r += evhttp_uri_set_scheme(uri, "http");
+    if (r < 0 || !evhttp_uri_join(uri, buf, URL_MAX)) {
+        evhttp_uri_free(uri);
+        throw runtime_error("Invalid ip or port");
+    }
+    url_ = buf;
     Init();
 }
 
-Client::Client(const std::string& url) : e_last_request_(0) {
+Client::Client(const std::string& url) : e_last_request_(0), url_(url) {
     auto uri = evhttp_uri_parse(url.c_str());
     if (!uri)
         throw runtime_error("Cannot pars client URL!");
-    http_port_ = evhttp_uri_get_port(uri);
-    http_ip_ = evhttp_uri_get_host(uri) ? string(evhttp_uri_get_host(uri)) : "";
-    http_scheme_ = evhttp_uri_get_scheme(uri) ? string(evhttp_uri_get_scheme(uri)) : "";
+    if (evhttp_uri_get_scheme(uri) == NULL)
+        throw invalid_argument("URL scheme was not set!");
+    if (evhttp_uri_get_host(uri) == NULL)
+        throw invalid_argument("Invalid host!");
     evhttp_uri_free(uri);
     Init();
 }
@@ -59,14 +69,10 @@ void Client::Init() {
     if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
         throw runtime_error("could not init sockets!");
 #endif
-    // create http_host_
-	http_host_ = http_ip_;
-	if (http_port_ > 0)
-		http_host_ += ":" + to_string(http_port_);
-
     // start connection
     e_base_ = event_base_new();
     e_dns_ = evdns_base_new(e_base_, 1);
+    e_conn_ = NULL;
 
     //evhttp_connection_set_timeout(e_conn_, 5);
     //event_enable_debug_logging(EVENT_DBG_ALL);
@@ -95,20 +101,6 @@ Request Client::Delete(std::string path, Handler handler, bool is_chunked) {
 }
 
 Request Client::CreateRequest(Request::RequestMethod method, std::string path, Handler handler, bool is_chunked) {
-    char buf[URL_MAX];
-    int r = 0;
-    auto uri = evhttp_uri_parse(path.c_str());
-	if (uri == NULL)
-        throw runtime_error("Invalid path");
-    r += evhttp_uri_set_host(uri, http_ip_.c_str());
-    r += evhttp_uri_set_port(uri, http_port_);
-    r += evhttp_uri_set_scheme(uri, http_scheme_.c_str());
-    if (r < 0 || !evhttp_uri_join(uri, buf, URL_MAX)) {
-        evhttp_uri_free(uri);
-        throw runtime_error("Invalid ip or port");
-    }
-    evhttp_uri_free(uri);
-    string url(buf);
     struct HandleContainer { Handler handler; event_base* e_base; };
     auto cont = new HandleContainer{ handler, e_base_ };
     auto req = evhttp_request_new(
@@ -152,8 +144,17 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, H
                 break;
             }
         });
+    char buf[URL_MAX];
+    auto uri = evhttp_uri_parse(url_.c_str());
+	int r = evhttp_uri_set_path(uri, path.c_str());
+    if (r < 0 || !evhttp_uri_join(uri, buf, URL_MAX)) {
+        evhttp_uri_free(uri);
+        throw runtime_error("Invalid path");
+    }
+    string url(buf);
     Request request(req, method, url);
-    request.PushHeader("Host", http_host_);
+    request.PushHeader("Host", evhttp_uri_get_host(uri));
+    evhttp_uri_free(uri);
     return request;
 }
 
@@ -172,7 +173,7 @@ void Client::SendAsyncRequest(Request& request) {
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
-    e_conn_ = evhttp_connection_base_new(e_base_, e_dns_, http_ip_.c_str(), http_port_);
+	e_conn_ = evhttp_connection_base_new(e_base_, e_dns_, request.Host().c_str(), request.ClientPort());
     evhttp_connection_free_on_completion(e_conn_);
     evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
     e_conn_ = NULL;
