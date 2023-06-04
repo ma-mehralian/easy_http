@@ -358,8 +358,8 @@ void Request::ParsUri(std::string url) {
             auto words_begin = std::sregex_iterator(query_str.begin(), query_str.end(), pattern);
             auto words_end = std::sregex_iterator();
             for (std::sregex_iterator i = words_begin; i != words_end; i++) {
-				char* k = evhttp_uridecode((*i)[1].str().c_str(), 0, NULL);
-				char* v = evhttp_uridecode((*i)[2].str().c_str(), 0, NULL);
+				char* k = evhttp_uridecode((*i)[1].str().c_str(), 1, NULL);
+				char* v = evhttp_uridecode((*i)[2].str().c_str(), 1, NULL);
 				std::string key(k);
 				std::string value(v);
                 free(k);
