@@ -33,9 +33,9 @@ public:
 	GetMiddlewareByType() {
 		if (!middleware_chain_) return nullptr;
 		auto last = middleware_chain_.get();
-		while (typeid(T) != typeid(*last) && last != nullptr)
+		while (last != nullptr && typeid(T) != typeid(*last))
 			last = last->next_.get();
-		return last ? static_cast<T*>(last) : last;
+		return static_cast<T*>(last);
 	}
 
 private:
