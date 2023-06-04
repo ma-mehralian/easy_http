@@ -10,9 +10,9 @@ public:
 	typedef std::map<std::string, std::string> HeaderList;
 	typedef std::function<void(const Response&)> Handler;
 
-	//! create new connection to url and keep it open
+	//! create new connection to host and keep it open
 	Client(const std::string& ip, int port);
-	Client(const std::string& url);
+	Client(const std::string& host);
 
 	~Client();
 
@@ -39,7 +39,9 @@ private:
 
 	void Init();
 
-	std::string url_;
+	uint16_t http_port_;
+	std::string http_scheme_;
+	std::string http_host_;
 	int error_code_;
 
 	struct evhttp_request* e_last_request_;

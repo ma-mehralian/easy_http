@@ -15,7 +15,9 @@
 
 using namespace std;
 
-Client::Client(const std::string& ip, int port){
+Client::Client(const std::string& ip, int port) 
+    : e_last_request_(0), http_host_(ip), http_port_(port), http_scheme_("http") 
+{
     char buf[URL_MAX];
     int r = 0;
     auto uri = evhttp_uri_new();
@@ -26,18 +28,22 @@ Client::Client(const std::string& ip, int port){
         evhttp_uri_free(uri);
         throw runtime_error("Invalid ip or port");
     }
-    url_ = buf;
     Init();
 }
 
-Client::Client(const std::string& url) : e_last_request_(0), url_(url) {
-    auto uri = evhttp_uri_parse(url.c_str());
+Client::Client(const std::string& host) : e_last_request_(0) {
+    auto uri = evhttp_uri_parse(host.c_str());
     if (!uri)
-        throw runtime_error("Cannot pars client URL!");
+        throw runtime_error("Cannot pars client host!");
+	http_port_ = evhttp_uri_get_port(uri) == -1 ? 80 : evhttp_uri_get_port(uri);
     if (evhttp_uri_get_scheme(uri) == NULL)
         throw invalid_argument("URL scheme was not set!");
+    else
+		http_scheme_ = evhttp_uri_get_scheme(uri);
     if (evhttp_uri_get_host(uri) == NULL)
         throw invalid_argument("Invalid host!");
+    else
+		http_host_ = evhttp_uri_get_host(uri) ? string(evhttp_uri_get_host(uri)) : "";
     evhttp_uri_free(uri);
     Init();
 }
@@ -145,16 +151,21 @@ Request Client::CreateRequest(Request::RequestMethod method, std::string path, H
             }
         });
     char buf[URL_MAX];
-    auto uri = evhttp_uri_parse(url_.c_str());
-	int r = evhttp_uri_set_path(uri, path.c_str());
+    int r = 0;
+    auto uri = evhttp_uri_parse(path.c_str());
+    if (uri == NULL)
+        throw runtime_error("Invalid path");
+    r += evhttp_uri_set_host(uri, http_host_.c_str());
+    r += evhttp_uri_set_port(uri, http_port_);
+    r += evhttp_uri_set_scheme(uri, http_scheme_.c_str());
     if (r < 0 || !evhttp_uri_join(uri, buf, URL_MAX)) {
         evhttp_uri_free(uri);
-        throw runtime_error("Invalid path");
+        throw runtime_error("Could not set host info!");
     }
+    evhttp_uri_free(uri);
     string url(buf);
     Request request(req, method, url);
-    request.PushHeader("Host", evhttp_uri_get_host(uri));
-    evhttp_uri_free(uri);
+    request.PushHeader("Host", http_host_);
     return request;
 }
 
@@ -173,7 +184,7 @@ void Client::SendAsyncRequest(Request& request) {
     case Request::RequestMethod::PATCH:     m = EVHTTP_REQ_PATCH; break;
     }
 #pragma pop_macro("DELETE")
-	e_conn_ = evhttp_connection_base_new(e_base_, e_dns_, request.Host().c_str(), request.ClientPort());
+	e_conn_ = evhttp_connection_base_new(e_base_, e_dns_, http_host_.c_str(), http_port_);
     evhttp_connection_free_on_completion(e_conn_);
     evhttp_make_request(e_conn_, request.evrequest_, m, request.FullUrl().c_str());
     e_conn_ = NULL;
