@@ -124,8 +124,15 @@ protected:
 
 private:
 	enum RequestType { REQUEST, RESPONSE } type_;
-
-	//scheme://[[userinfo]@]foo.com[:port]]/[path][?query][#fragment]
+	/*!
+	*	https://bob:bobby@www.lunatech.com:8080/file;p=1?q=2#third
+	*	\___/   \_/ \___/ \______________/ \__/\_______/ \_/ \___/
+	*	  |      |    |          |          |      | \_/  |    |
+	*	Scheme User Password    Host       Port  Path |   | Fragment
+	*			\_____________________________/       | Query
+	*						   |               Path parameter
+	*					   Authority
+	*/
 	struct Uri {
 		std::string scheme;
 		std::string userinfo;
