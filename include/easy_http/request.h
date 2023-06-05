@@ -69,20 +69,26 @@ public:
 	bool QueryFilled(std::string key) const { return IsFilled(uri_.query, key); }
 
 	//! Push the header to sending request headers
+	//! \note: All HTTP header keys are converted to lowercase in both directions
+	//!  (since HTTP header keys are defined to be case-insensitive)
 	Request& PushHeader(const std::string& key, const std::string& value);
 
 	//! Push multiple headers to sending request headers
+	//! \note: All HTTP header keys are converted to lowercase in both directions
+	//!  (since HTTP header keys are defined to be case-insensitive)
 	Request& PushHeader(const ParamList& headers);
 
 	//! Retrieve a headers list from the received request.
 	const ParamList& Headers() const { return input_headers_; }
 
 	//!Retrieve a header from the received request.
+	//! \note: All HTTP header keys are converted to lowercase in both directions
+	//!  (since HTTP header keys are defined to be case-insensitive)
 	template <typename T>
-	T Header(std::string key, T default_value = T()) const { return GetVal<T>(input_headers_, key, default_value); }
+	T Header(std::string key, T default_value = T()) const { return GetVal<T>(input_headers_, ToLower(key), default_value); }
 
 	//! Determine if the received request contains a non-empty value for an input item.
-	bool HeaderFilled(std::string key) const { return IsFilled(input_headers_, key); }
+	bool HeaderFilled(std::string key) const { return IsFilled(input_headers_, ToLower(key)); }
 
 	//! Get the client IP address.
 	const std::string& ClientIp() const { return client_ip_; }
@@ -150,6 +156,9 @@ private:
 	//-- chunck
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;
+
+	//! change string to lowercase
+	std::string ToLower(const std::string& str) const;
 
 	//! fill uri_ values from input url or path
 	void ParsUri(std::string url);

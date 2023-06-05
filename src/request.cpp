@@ -152,7 +152,7 @@ Request::Request(evhttp_request* request) : evrequest_(request), type_(RequestTy
     auto headers = evhttp_request_get_input_headers(request);
     auto h_keyval = headers->tqh_first;
     while (h_keyval){
-        input_headers_[h_keyval->key] = h_keyval->value;
+		input_headers_[ToLower(h_keyval->key)] = h_keyval->value;
         h_keyval = h_keyval->next.tqe_next;
     }
 }
@@ -204,10 +204,10 @@ http_chunked_trickle_cb(evutil_socket_t fd, short events, void* arg) {
 void Request::Reply(int status_code) {
     //--- add headers
     ParamList default_headers = {
-        {"Access-Control-Allow-Origin", "*"},
-        {"Access-Control-Allow-Credentials", "true"},
-        {"Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"},
-        {"Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, X-Auth-Token, "
+        {"access-control-allow-origin", "*"},
+        {"access-control-allow-credentials", "true"},
+        {"access-control-allow-methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"},
+        {"access-control-allow-headers", "Origin, Accept, X-Requested-With, X-Auth-Token, "
             "Content-Type, Access-Control-Allow-Headers, "
             "Access-Control-Request-Method, Access-Control-Request-Headers"}
     };
@@ -276,7 +276,7 @@ Request& Request::SetFileContent(std::string file_path) {
         string ext = FS::path(file_path).extension().string();
         auto mime = content_type_table.find(ext);
         if (mime != content_type_table.end())
-            PushHeader("Content-type", mime->second);
+            PushHeader("content-type", mime->second);
 //#ifdef NDEBUG
         //evbuffer_set_flags(response_buffer.get(), EVBUFFER_FLAG_DRAINS_TO_FD);
         int r = evbuffer_add_file(evhttp_request_get_output_buffer(evrequest_), fd, 0, size);
@@ -291,20 +291,18 @@ Request& Request::SetFileContent(std::string file_path) {
     return *this;
 }
 
-
 Request& Request::PushHeader(const std::string& key, const std::string& value) {
 	int r = evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
-		key.c_str(), value.c_str());
+        ToLower(key).c_str(), value.c_str());
     if (r != 0)
         throw runtime_error("Cannot set header " + key);
     return *this;
 }
 
-
 Request& Request::PushHeader(const ParamList& headers) {
     for (auto& h : headers)
         evhttp_add_header(evhttp_request_get_output_headers(evrequest_),
-            h.first.c_str(), h.second.c_str());
+            ToLower(h.first).c_str(), h.second.c_str());
     return *this;
 }
 
@@ -333,6 +331,13 @@ bool Request::UrlIs(std::string pattern, std::vector<std::string>& vars) const {
 bool Request::UrlIs(std::string pattern) const {
 	std::smatch base_match;
     return std::regex_match(uri_.path, base_match, std::regex(pattern));
+}
+
+std::string Request::ToLower(const std::string& str) const {
+    string r = str;
+    std::transform(r.begin(), r.end(), r.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+    return r;
 }
 
 void Request::ParsUri(std::string url) {
