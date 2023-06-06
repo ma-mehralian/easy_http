@@ -126,6 +126,7 @@ protected:
 	//! reply the received request (this function is called in Response class)
 	void Reply(int status_code);
 
+	bool reply_complete_;
 	evhttp_request* evrequest_;
 
 private:
@@ -156,6 +157,8 @@ private:
 	//-- chunck
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;
+
+	static void OnReplyComplete(struct evhttp_request* evcon, void* arg);
 
 	//! change string to lowercase
 	std::string ToLower(const std::string& str) const;

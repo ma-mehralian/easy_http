@@ -155,6 +155,8 @@ Request::Request(evhttp_request* request) : evrequest_(request), type_(RequestTy
 		input_headers_[ToLower(h_keyval->key)] = h_keyval->value;
         h_keyval = h_keyval->next.tqe_next;
     }
+    reply_complete_ = false;
+    evhttp_request_set_on_complete_cb(request, Request::OnReplyComplete, this);
 }
 
 Request::Request(evhttp_request* request, Request::RequestMethod method, std::string url)
@@ -225,6 +227,11 @@ void Request::Reply(int status_code) {
         evhttp_send_reply_start(evrequest_, status_code, "OK");
         schedule_trickle(state, 0);
     }
+}
+
+void Request::OnReplyComplete(struct evhttp_request* evcon, void* arg) {
+    auto request = static_cast<Request*>(arg);
+    request->reply_complete_ = true;
 }
 
 Request& Request::SetChunkCallback(std::function<bool(std::string&)> func) {
