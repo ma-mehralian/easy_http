@@ -13,9 +13,13 @@ public:
 	Server(const std::string &ip, int port);
 	~Server();
 
-	//since we pass Server pointer to request handler so the current object pointer should not be changed
+	//! since we pass Server pointer to request handler so the current object pointer should not be changed
 	Server(const Server&) = delete;
 	Server& operator= (const Server&) = delete;
+
+	//! disable move constructor
+	Server(Server&& req) = delete;
+	Server& operator=(Server&& req) = delete;
 
 	//! start http server
 	virtual int Start();
