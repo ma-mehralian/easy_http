@@ -236,7 +236,7 @@ void Server::RequestHandler(evhttp_request* request, void* server_ptr) {
 Response Server::RequestHandler(const Request& request) {
     // check route urls
     for (auto& r : routes_)
-        if (request.UrlIs(r.Url()))
+        if (r.IsMatch(request))
             return r.CallHandler(request);
 
     // check controller urls
