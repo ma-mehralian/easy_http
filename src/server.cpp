@@ -188,27 +188,27 @@ int Server::Stop() {
 	return 0;
 }
 
-Route& Server::Get(std::string url, Handler handler) {
+Route& Server::Get(std::string url, RequestBase::RequestHandler handler) {
     routes_.push_back(Route::Get(url, handler));
     return routes_.back();
 }
 
-Route& Server::Post(std::string url, Handler handler) {
+Route& Server::Post(std::string url, RequestBase::RequestHandler handler) {
     routes_.push_back(Route::Post(url, handler));
     return routes_.back();
 }
 
-Route& Server::Put(std::string url, Handler handler) {
+Route& Server::Put(std::string url, RequestBase::RequestHandler handler) {
     routes_.push_back(Route::Put(url, handler));
     return routes_.back();
 }
 
-Route& Server::Patch(std::string url, Handler handler) {
+Route& Server::Patch(std::string url, RequestBase::RequestHandler handler) {
     routes_.push_back(Route::Patch(url, handler));
     return routes_.back();
 }
 
-Route& Server::Delete(std::string url, Handler handler) {
+Route& Server::Delete(std::string url, RequestBase::RequestHandler handler) {
     routes_.push_back(Route::Delete(url, handler));
     return routes_.back();
 }
@@ -233,7 +233,7 @@ void Server::RequestHandler(evhttp_request* request, void* server_ptr) {
 		LOG_DEBUG(server, "response[{}] sent for {}", http_response.GetStatusCode(), http_request.Url());
 }
 
-Response Server::RequestHandler(Request& request) {
+Response Server::RequestHandler(const Request& request) {
     // check route urls
     for (auto& r : routes_)
         if (request.UrlIs(r.Url()))

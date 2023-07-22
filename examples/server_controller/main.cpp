@@ -12,19 +12,19 @@ public:
 	}
 
 private:
-	Response Test1(Request& request) {
+	Response Test1(const Request& request) {
 		cout << "test1 called" << endl;
 		Response response(request, 200);
 		response.SetContent("Test1 callback");
-		return response;
+		return move(response);
 	}
 
-	Response Test2(Request& request) {
+	Response Test2(const Request& request) {
 		cout << "test2 called" << endl;
 		string name = request.Query<string>("name", "no-name");
 		Response response(request, 200);
 		response.SetContent("Hello "+ name);
-		return response;
+		return move(response);
 	}
 };
 

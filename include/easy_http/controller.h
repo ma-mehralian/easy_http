@@ -15,21 +15,17 @@ public:
 
 
 	// Handle request if the request matched with controller routes
-	Response CallHandler(Request& request);
+	Response CallHandler(const Request& request);
 
 	// check if the request will match with one of the controller routes
-	bool IsMatch(Request& request);
+	bool IsMatch(const Request& request) const;
 
 protected:
-	typedef Response(Controller::* Handler)(Request&);
-
-	//typedef std::function<Response(Request&)> Handler;
-
 	//! Add new Get route
 	template<class Derived>
 	std::enable_if_t<std::is_base_of<Controller, Derived>::value, Route&>
-	Get(std::string url, Response(Derived::* handler)(Request&)) {
-		Route::Handler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
+	Get(std::string url, Response(Derived::* handler)(const Request&)) {
+		RequestBase::RequestHandler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
 		routes_.push_back(Route::Get(url_prefix_ + url, h));
 		return routes_.back();
 	}
@@ -37,8 +33,8 @@ protected:
 	//! Add new Post route
 	template<class Derived>
 	std::enable_if_t<std::is_base_of<Controller, Derived>::value, Route&>
-	Post(std::string url, Response(Derived::* handler)(Request&)) {
-		Route::Handler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
+	Post(std::string url, Response(Derived::* handler)(const Request&)) {
+		RequestBase::RequestHandler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
 		routes_.push_back(Route::Post(url_prefix_ + url, h));
 		return routes_.back();
 	}
@@ -46,8 +42,8 @@ protected:
 	//! Add new Put route
 	template<class Derived>
 	std::enable_if_t<std::is_base_of<Controller, Derived>::value, Route&>
-	Put(std::string url, Response(Derived::* handler)(Request&)) {
-		Route::Handler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
+	Put(std::string url, Response(Derived::* handler)(const Request&)) {
+		RequestBase::RequestHandler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
 		routes_.push_back(Route::Put(url_prefix_ + url, h));
 		return routes_.back();
 	}
@@ -55,8 +51,8 @@ protected:
 	//! Add new Patch route
 	template<class Derived>
 	std::enable_if_t<std::is_base_of<Controller, Derived>::value, Route&>
-	Patch(std::string url, Response(Derived::* handler)(Request&)) {
-		Route::Handler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
+	Patch(std::string url, Response(Derived::* handler)(const Request&)) {
+		RequestBase::RequestHandler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
 		routes_.push_back(Route::Patch(url_prefix_ + url, h));
 		return routes_.back();
 	}
@@ -64,8 +60,8 @@ protected:
 	//! Add new Delete route
 	template<class Derived>
 	std::enable_if_t<std::is_base_of<Controller, Derived>::value, Route&>
-	Delete(std::string url, Response(Derived::* handler)(Request&)) {
-		Route::Handler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
+	Delete(std::string url, Response(Derived::* handler)(const Request&)) {
+		RequestBase::RequestHandler h = std::bind(handler, dynamic_cast<Derived*>(this), std::placeholders::_1);
 		routes_.push_back(Route::Delete(url_prefix_ + url, h));
 		return routes_.back();
 	}
@@ -85,7 +81,7 @@ protected:
 	std::string url_prefix_;
 
 private:
-	Response Handle(Request& request);
+	Response Handle(const Request& request);
 
 	std::vector<Route> routes_;
 

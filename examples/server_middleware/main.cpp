@@ -9,37 +9,50 @@ class AuthenticateMiddleware : public Middleware {
 public:
 	AuthenticateMiddleware(std::string token) :token_(token) {}
 
-	Response Handle(Request& request, Handler next) override {
-		cout << "AuthenticateMiddleware" << endl;
+	Response Handle(const Request& request, RequestBase::RequestHandler next) override {
 		if (request.Header<string>("Authorization") == token_)
 			return next(request);
-		else
-			return Response(request, 401);
+		else {
+			auto r = Response(request, 401);
+			r.SetContent("authentication failed");
+			return move(r);
+		}
 	}
+	auto GetToken() { return token_; }
 };
 
-Response Test1(Request& request) {
-	cout << "test1 called" << endl;
-	Response response(request, 200);
-	response.SetContent("Test1 callback");
-	return response;
-}
+class MyController : public Controller {
+public:
+	MyController(std::string url_prefix) : Controller(url_prefix) {
+		Get("/test1", &MyController::Test1);
+		Post("/test2", &MyController::Test2);
+		AddMiddleware(make_unique<AuthenticateMiddleware>("AbCd@1234"));
+	}
 
-Response Test2(Request& request) {
-	cout << "test2 called" << endl;
-	string name = request.Query<string>("name", "no-name");
-	Response response(request, 200);
-	response.SetContent("Hello " + name);
-	return response;
-}
+private:
+	Response Test1(const Request& request) {
+		cout << "test1 called" << endl;
+		Response response(request, 200);
+		response.SetContent("Test1 callback");
+		return move(response);
+	}
+
+	Response Test2(const Request& request) {
+		cout << "test2 called with token " 
+			<< this->GetMiddlewareByType<AuthenticateMiddleware>()->GetToken() 
+			<< endl;
+		string name = request.Query<string>("name", "no-name");
+		Response response(request, 200);
+		response.SetContent("Hello " + name);
+		return move(response);
+	}
+};
 
 int main(int argn, char* argc[]) {
 	string ip = "0.0.0.0";
 	int port = 4000;
 	Server s(ip, port);
-	s.Get("/test1", Test1)
-		.AddMiddleware(make_unique<AuthenticateMiddleware>("C194A94D-BEB5-4A8D-B4BB-94E99AA38D61"));
-	s.Post("/test2", Test2);
+	s.RegisterController(make_unique<MyController>("/users"));
 	if (s.Start() != 0){
 		cout << "Cannot start HTTP server http://" << ip << ":" << port << endl;
 		return -1;

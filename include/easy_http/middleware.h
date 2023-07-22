@@ -8,17 +8,15 @@ class Middleware {
 public:
 	Middleware() : next_(nullptr) {	}
 
-	typedef std::function<Response(Request&)> Handler;
-
-	virtual Response Handle(Request& request, Handler next) = 0;
+	virtual Response Handle(const Request& request, Response::RequestHandler next) = 0;
 
 private:
 	friend class Route;
 	friend class Controller;
 
-	Response CallHandler(Request& request);
+	Response CallHandler(const Request& request);
 
-	Handler last_;
+	Response::RequestHandler last_;
 	std::unique_ptr<Middleware> next_;
 	std::string url_;
 };

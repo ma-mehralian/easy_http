@@ -1,44 +1,34 @@
 #ifndef _HTTP_RESPONSE_H_
 #define _HTTP_RESPONSE_H_
 
-#include <easy_http/request.h>
+#include <easy_http/request_base.h>
 #include <string>
 #include <vector>
 #include <map>
 
-//! https://github.com/symfony/http-foundation/blob/6.2/Response.php
-class Response {
+/*! 
+* Response for requests reply
+* 
+* inspired by : https://github.com/symfony/http-foundation/blob/6.2/Response.php
+*/
+//class Response : public RequestBaseAbstract<Response> {
+class Response : public RequestBase {
 public:
-	typedef std::map<std::string, std::string> HeaderList;
-	//! constructor
-	Response(Request request, int status = 200, HeaderList headers = HeaderList());
-	Response(const Response& response);
-	Response(Response&& response);
-	Response& operator=(const Response& response);
-	Response& operator=(Response&& response);
+	//! client constructor.
+	//! used when received the reply from the sent request
+	Response(struct evhttp_request* request);
+
+	//! server constructor.
+	//! used when replying the received request
+	Response(const RequestBase& req, int status_code);
+
+	using RequestBase::operator=;
 
 	~Response();
 
-	//! get response content
-	const std::string GetContent() const;
-
-	//! set response content
-	Response& SetContent(const std::string content);
-
-	//! set handler for chunked response
-	Response& SetChunkCallback(std::function<bool(std::string&)> func);
-
-	//! set response headers
-	Response& SetHeaders(const HeaderList& headers);
-
-	//void SetProtocolVersion(std::string version) { version_ = version; }
-	//std::string GetProtocolVersion() const { return version_; }
-
 	Response& SetStatusCode(int code);
 	int GetStatusCode() const { return status_code_; }
-
-	//Response& SetCharset(std::string charset);
-	//std::string GetCharset() const;
+	int Send();
 
 	bool IsInvalid() const { return status_code_ < 100 || status_code_ >= 600; }
 	bool IsInformational() const { return status_code_ >= 100 && status_code_ < 200; }
@@ -52,12 +42,7 @@ public:
 	bool IsRedirect() const { throw std::runtime_error("Not Implemented"); }
 	bool IsEmpty() const { throw std::runtime_error("Not Implemented"); }
 
-	Response& SetFilePath(std::string path);
-
-	int Send();
-
 protected:
-	Request request_;
 	int status_code_;
 };
 

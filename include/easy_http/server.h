@@ -10,8 +10,6 @@
 
 class Server {
 public:
-	typedef std::function<Response(Request&)> Handler;
-
 	Server(const std::string &ip, int port);
 	~Server();
 
@@ -25,15 +23,15 @@ public:
 	//! stop http server
 	virtual int Stop();
 
-	Route& Get(std::string url, Handler handler);
+	Route& Get(std::string url, RequestBase::RequestHandler handler);
 
-	Route& Post(std::string url, Handler handler);
+	Route& Post(std::string url, RequestBase::RequestHandler handler);
 
-	Route& Put(std::string url, Handler handler);
+	Route& Put(std::string url, RequestBase::RequestHandler handler);
 
-	Route& Patch(std::string url, Handler handler);
+	Route& Patch(std::string url, RequestBase::RequestHandler handler);
 
-	Route& Delete(std::string url, Handler handler);
+	Route& Delete(std::string url, RequestBase::RequestHandler handler);
 
 	/*!
 	 * call in this way:
@@ -49,7 +47,7 @@ public:
 
 protected:
 	//! Http server event handler
-	virtual Response RequestHandler(Request& request);
+	virtual Response RequestHandler(const Request& request);
 
 	std::vector<std::unique_ptr<Controller>> controllers_;
 #ifdef USE_SPDLOG

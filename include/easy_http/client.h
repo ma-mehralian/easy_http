@@ -3,12 +3,10 @@
 
 #include <string>
 #include <easy_http/request.h>
-#include <easy_http/response.h>
 
 class Client {
 public:
 	typedef std::map<std::string, std::string> HeaderList;
-	typedef std::function<void(const Response&)> Handler;
 
 	//! create new connection to host and keep it open
 	Client(const std::string& ip, int port);
@@ -16,35 +14,26 @@ public:
 
 	~Client();
 
-	Request Get(std::string path, Handler handler, bool is_chunked = false);
+	Request Get(std::string path, Request::ResponseHandler handler, bool is_chunked = false);
 
-	Request Post(std::string path, Handler handler, bool is_chunked = false);
+	Request Post(std::string path, Request::ResponseHandler handler, bool is_chunked = false);
 
-	Request Put(std::string path, Handler handler, bool is_chunked = false);
+	Request Put(std::string path, Request::ResponseHandler handler, bool is_chunked = false);
 
-	Request Patch(std::string path, Handler handler, bool is_chunked = false);
+	Request Patch(std::string path, Request::ResponseHandler handler, bool is_chunked = false);
 
-	Request Delete(std::string path, Handler handler, bool is_chunked = false);
-
-	//! send non-blocking request
-	void SendAsyncRequest(Request& request);
-
-	//! Send a new request and block until the response or error received
-	void SendRequest(Request& request);
-
+	Request Delete(std::string path, Request::ResponseHandler handler, bool is_chunked = false);
 private:
 
 	//! create new request for the client connection
-	Request CreateRequest(Request::RequestMethod method, std::string path, Handler handler, bool is_chunked);
+	Request CreateRequest(RequestBase::RequestMethod method, std::string path, RequestBase::ResponseHandler handler, bool is_chunked);
 
 	void Init();
 
 	uint16_t http_port_;
 	std::string http_scheme_;
 	std::string http_host_;
-	int error_code_;
 
-	struct evhttp_request* e_last_request_;
 	struct event_base* e_base_;
 	struct evdns_base* e_dns_;
 	struct evhttp_connection* e_conn_;

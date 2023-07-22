@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Response Middleware::CallHandler(Request& request) {
+Response Middleware::CallHandler(const Request& request) {
 	if (next_)
 		return Handle(request, bind(&Middleware::CallHandler, next_.get(), placeholders::_1));
 	else

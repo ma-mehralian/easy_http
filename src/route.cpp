@@ -1,26 +1,26 @@
 #include <easy_http/route.h>
 
-Route Route::Get(std::string url, Handler handler) {
-	return Route(Request::RequestMethod::GET, url, handler);
+Route Route::Get(std::string url, Response::RequestHandler handler) {
+	return Route(RequestBase::RequestMethod::GET, url, handler);
 }
 
-Route Route::Post(std::string url, Handler handler) {
-	return Route(Request::RequestMethod::POST, url, handler);
+Route Route::Post(std::string url, Response::RequestHandler handler) {
+	return Route(RequestBase::RequestMethod::POST, url, handler);
 }
 
-Route Route::Put(std::string url, Handler handler) {
-	return Route(Request::RequestMethod::PUT, url, handler);
+Route Route::Put(std::string url, Response::RequestHandler handler) {
+	return Route(RequestBase::RequestMethod::PUT, url, handler);
 }
 
-Route Route::Patch(std::string url, Handler handler) {
-	return Route(Request::RequestMethod::PATCH, url, handler);
+Route Route::Patch(std::string url, Response::RequestHandler handler) {
+	return Route(RequestBase::RequestMethod::PATCH, url, handler);
 }
 
-Route Route::Delete(std::string url, Handler handler) {
-	return Route(Request::RequestMethod::DELETE, url, handler);
+Route Route::Delete(std::string url, Response::RequestHandler handler) {
+	return Route(RequestBase::RequestMethod::DELETE, url, handler);
 }
 
-Response Route::CallHandler(Request& request) {
+Response Route::CallHandler(const Request& request) {
 	if (middleware_chain_)
 		return middleware_chain_->CallHandler(request);
 	else

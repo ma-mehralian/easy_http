@@ -9,14 +9,14 @@ Controller::Controller(std::string url_prefix) : url_prefix_(url_prefix), middle
 		throw std::runtime_error("url prefix should be started with '/'");
 }
 
-Response Controller::Handle(Request& request) {
+Response Controller::Handle(const Request& request) {
 	for (auto& r : routes_)
 		if (request.UrlIs(r.Url()) && request.Method() == r.Method())
 			return r.CallHandler(request);
 	return Response(request, 404);
 }
 
-bool Controller::IsMatch(Request& request) {
+bool Controller::IsMatch(const Request& request) const {
 	for (auto& r : routes_)
 		if (request.UrlIs(r.Url()) && request.Method() == r.Method())
 			return true;
@@ -36,7 +36,7 @@ Controller& Controller::AddMiddleware(std::unique_ptr<Middleware> middleware) {
 	return *this;
 }
 
-Response Controller::CallHandler(Request& request) {
+Response Controller::CallHandler(const Request& request) {
 	if (middleware_chain_)
 		return middleware_chain_->CallHandler(request);
 	else

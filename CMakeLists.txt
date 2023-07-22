@@ -19,6 +19,8 @@ set(PROJECT_HEADERS
     include/${PROJECT_NAME}/server.h
     include/${PROJECT_NAME}/client.h
     include/${PROJECT_NAME}/route.h
+    include/${PROJECT_NAME}/ev_request.h
+    include/${PROJECT_NAME}/request_base.h
     include/${PROJECT_NAME}/request.h
     include/${PROJECT_NAME}/response.h
     include/${PROJECT_NAME}/controller.h
@@ -28,6 +30,8 @@ add_library(${PROJECT_NAME} STATIC
     src/server.cpp
     src/client.cpp
     src/route.cpp
+    src/ev_request.cpp
+    src/request_base.cpp
     src/request.cpp
     src/response.cpp
     src/controller.cpp

@@ -8,25 +8,23 @@
 
 class Route {
 public:
-	typedef std::function<Response(Request&)> Handler;
+	static Route Get(std::string url, RequestBase::RequestHandler handler);
 
-	static Route Get(std::string url, Handler handler);
+	static Route Post(std::string url, RequestBase::RequestHandler handler);
 
-	static Route Post(std::string url, Handler handler);
+	static Route Put(std::string url, RequestBase::RequestHandler handler);
 
-	static Route Put(std::string url, Handler handler);
+	static Route Patch(std::string url, RequestBase::RequestHandler handler);
 
-	static Route Patch(std::string url, Handler handler);
+	static Route Delete(std::string url, RequestBase::RequestHandler handler);
 
-	static Route Delete(std::string url, Handler handler);
-
-	Response CallHandler(Request& request);
+	Response CallHandler(const Request& request);
 
 	Route& AddMiddleware(std::unique_ptr<Middleware> middleware);
 
 	const std::string Url() const { return url_; }
 
-	const Request::RequestMethod Method() const { return method_; }
+	const RequestBase::RequestMethod Method() const { return method_; }
 
 	template<class T>
 	std::enable_if_t<std::is_base_of<Middleware, T>::value, T*>
@@ -39,14 +37,14 @@ public:
 	}
 
 private:
-	Route(Request::RequestMethod method, std::string url, Handler handler)
+	Route(RequestBase::RequestMethod method, std::string url, RequestBase::RequestHandler handler)
 		: url_(url), method_(method), handler_(handler), middleware_chain_(nullptr) {}
 
 	std::string url_;
 
-	Request::RequestMethod method_;
+	RequestBase::RequestMethod method_;
 
-	Handler handler_;
+	RequestBase::RequestHandler handler_;
 
 	std::unique_ptr<Middleware> middleware_chain_;
 
