@@ -18,7 +18,7 @@ Response Controller::Handle(const Request& request) {
 
 bool Controller::IsMatch(const Request& request) const {
 	for (auto& r : routes_)
-		if (request.UrlIs(r.Url()) && request.Method() == r.Method())
+		if (r.IsMatch(request))
 			return true;
 	return false;
 }

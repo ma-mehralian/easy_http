@@ -39,3 +39,7 @@ Route& Route::AddMiddleware(std::unique_ptr<Middleware> middleware) {
 	}
 	return *this;
 }
+
+bool Route::IsMatch(const Request& request) const {
+	return request.UrlIs(url_) && request.Method() == method_;
+}

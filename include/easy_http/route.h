@@ -24,6 +24,9 @@ public:
 
 	const std::string Url() const { return url_; }
 
+	// check if the request will match with the route
+	bool IsMatch(const Request& request) const;
+
 	const RequestBase::RequestMethod Method() const { return method_; }
 
 	template<class T>
