@@ -583,9 +583,10 @@ bool RequestBase::GetVal(std::string str_value) const {
 // time format should be %Y-%m-%d or %Y-%m-%d-%H-%M-%S
 template<>
 time_t RequestBase::GetVal(std::string str_value) const {
-    if (std::count(str_value.begin(), str_value.end(), '-') == 2)
-        str_value += "-00-00-00";
-    return str2time(str_value, "%Y-%m-%d-%H-%M-%S");
+    return strtoll(str_value.data(), NULL, 10);
+    //if (std::count(str_value.begin(), str_value.end(), '-') == 2)
+    //    str_value += "-00-00-00";
+    //return str2time(str_value, "%Y-%m-%d-%H-%M-%S");
 }
 
 template<>
