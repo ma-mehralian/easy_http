@@ -224,13 +224,19 @@ void Server::SetLogger(std::shared_ptr<spdlog::logger> logger) {
 #endif //USE_SPDLOG
 
 void Server::RequestHandler(evhttp_request* request, void* server_ptr) {
-    auto server = static_cast<Server*>(server_ptr);
-    Request http_request(request);
-    LOG_DEBUG(server, "new request[{}] for {} from {}:{}", (int)http_request.Method(),
-        http_request.Url(), http_request.ClientIp(), http_request.ClientPort());
-	auto http_response = server->RequestHandler(http_request);
-	if (http_response.Send() == 0)
-		LOG_DEBUG(server, "response[{}] sent for {}", http_response.GetStatusCode(), http_request.Url());
+	try {
+		auto server = static_cast<Server*>(server_ptr);
+		Request http_request(request);
+		LOG_DEBUG(server, "new request[{}] for {} from {}:{}", (int)http_request->Method(),
+			http_request->Path(), http_request->ConnectionAddress(), http_request->ConnectionPort());
+		auto http_response = server->RequestHandler(http_request);
+		if (http_response.Send() == 0)
+			LOG_DEBUG(server, "response[{}] sent for {}", http_response.GetStatusCode(), http_request.Url());
+	}
+	catch (const std::exception& e) {
+        printf("crash on %s\n", evhttp_request_get_uri(request));
+        evhttp_send_reply(request, 500, "ok", nullptr);
+	}
 }
 
 Response Server::RequestHandler(const Request& request) {
