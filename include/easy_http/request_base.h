@@ -84,7 +84,7 @@ public:
 	template<typename... outs>
 	std::tuple<outs...> UrlVars(std::string pattern) const {
 		std::smatch base_match;
-		string path = this->Path();
+		std::string path = this->Path();
 		std::regex_match(path, base_match, std::regex(pattern));
 		return tuple_helper(base_match, std::tuple<outs...>());
 	}
@@ -191,6 +191,22 @@ private:
 		return tuple_helper(matches, 1, t);
 	}
 
+
+};
+
+template <typename T> 
+class RequestBaseAbstract: public RequestBase {
+public:
+	using RequestBase::RequestBase;
+
+	T& SetContent(const std::string& content) {
+		RequestBase::SetContent(content);
+		return *static_cast<T*>(this);
+	}
+
+	T& SetContent(const std::vector<char>& content);
+
+	T& SetFileContent(std::string file_path);
 
 };
 
