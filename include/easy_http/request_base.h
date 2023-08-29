@@ -6,7 +6,6 @@
 #include <regex>
 #include <type_traits>
 
-//template <typename DT> 
 class RequestBase {
 public:
 	enum class RequestMethod { GET, POST, HEAD, PUT, DELETE, OPTIONS, TRACE, CONNECT, PATCH };
@@ -199,15 +198,31 @@ class RequestBaseAbstract: public RequestBase {
 public:
 	using RequestBase::RequestBase;
 
+	RequestBaseAbstract<T>(const RequestBase& req) : RequestBase(req) {}
+
 	T& SetContent(const std::string& content) {
-		RequestBase::SetContent(content);
-		return *static_cast<T*>(this);
+		return *static_cast<T*>(&RequestBase::SetContent(content));
 	}
 
-	T& SetContent(const std::vector<char>& content);
+	T& SetContent(const std::vector<char>& content){
+		return *static_cast<T*>(&RequestBase::SetContent(content));
+	}
 
-	T& SetFileContent(std::string file_path);
+	T& SetFileContent(std::string file_path){
+		return *static_cast<T*>(&RequestBase::SetFileContent(file_path));
+	}
 
+	T& PushHeader(const std::string& key, const std::string& value){
+		return *static_cast<T*>(&RequestBase::PushHeader(key, value));
+	}
+
+	T& PushHeader(const ParamList& headers){
+		return *static_cast<T*>(&RequestBase::PushHeader(headers));
+	}
+
+	T& SetChunkCallback(std::function<bool(std::string&)> func) {
+		return *static_cast<T*>(&RequestBase::SetChunkCallback(func));
+	}
 };
 
 #endif // !_HTTP_REQUEST_BASE_H_

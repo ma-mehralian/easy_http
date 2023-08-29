@@ -3,7 +3,7 @@
 
 #include <easy_http/request_base.h>
 
-class Request: public RequestBase {
+class Request: public RequestBaseAbstract<Request> {
 public:
 	//! server constructor
 	Request(struct evhttp_request* request);

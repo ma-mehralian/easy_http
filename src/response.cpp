@@ -3,12 +3,12 @@
 using namespace std;
 
 Response::Response(struct evhttp_request* request)
-	: RequestBase(request), status_code_(RequestBase::ResponseCode())
+	: RequestBaseAbstract<Response>(request), status_code_(RequestBase::ResponseCode())
 {
 }
 
 Response::Response(const RequestBase& req, int status_code) 
-	:RequestBase(req), status_code_(status_code)
+	:RequestBaseAbstract<Response>(req), status_code_(status_code)
 {
 }
 

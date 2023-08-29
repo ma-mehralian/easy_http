@@ -3,15 +3,14 @@
 
 using namespace std;
 
-Request::Request(struct evhttp_request* request) : RequestBase(request){
+Request::Request(struct evhttp_request* request) : RequestBaseAbstract<Request>(request){
 }
 
 Request::Request(struct evhttp_connection* e_con, RequestBase::RequestMethod method, std::string url, RequestBase::ResponseHandler handler, bool is_chunked)
 	: e_con_(e_con), method_(method), 
-	RequestBase(url, handler, is_chunked)
-	{}
+	RequestBaseAbstract<Request>(url, handler, is_chunked){}
 
-Request::Request(const Request& req) :RequestBase(req) {
+Request::Request(const Request& req) :RequestBaseAbstract<Request>(req) {
 	*this = req;
 }
 
@@ -22,7 +21,7 @@ Request& Request::operator=(const Request& req) {
 	return *this;
 }
 
-Request::Request(Request&& req) :RequestBase(req) {
+Request::Request(Request&& req) :RequestBaseAbstract<Request>(req) {
 	*this = move(req);
 }
 

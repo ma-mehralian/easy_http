@@ -11,8 +11,7 @@
 * 
 * inspired by : https://github.com/symfony/http-foundation/blob/6.2/Response.php
 */
-//class Response : public RequestBaseAbstract<Response> {
-class Response : public RequestBase {
+class Response : public RequestBaseAbstract<Response> {
 public:
 	//! client constructor.
 	//! used when received the reply from the sent request
