@@ -22,6 +22,16 @@ public:
 	void Send();
 	void SendAsync();
 
+	//! Push the parameter to sending request parameters
+	//! \note: All HTTP header keys are converted to lowercase in both directions
+	//!  (since HTTP header keys are defined to be case-insensitive)
+	Request& PushParam(const std::string& key, const std::string& value);
+
+	//! Push multiple headers to sending request parameters
+	//! \note: All HTTP header keys are converted to lowercase in both directions
+	//!  (since HTTP header keys are defined to be case-insensitive)
+	Request& PushParam(const ParamList& params);
+
 private:
 	struct evhttp_connection* e_con_;
 	RequestBase::RequestMethod method_;

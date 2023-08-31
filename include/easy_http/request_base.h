@@ -131,11 +131,11 @@ protected:
 	void SendAsync(struct evhttp_connection* e_con, RequestMethod method);
 	void Send(struct evhttp_connection* e_con, RequestMethod method);
 
+	std::shared_ptr<struct evhttp_uri> e_uri_;
 private:
 	enum RequestType { REQUEST, RESPONSE } type_;
 	static const std::map<std::string, std::string> content_types_;
 	struct evhttp_request* e_request_;
-	std::shared_ptr<struct evhttp_uri> e_uri_;
 	std::shared_ptr<struct CallBackContainer> cb_container_;
 	ResponseHandler response_handler_;
 	bool request_complete_;
