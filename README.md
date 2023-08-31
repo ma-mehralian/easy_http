@@ -33,17 +33,19 @@ cmake --build . --target install -- -j4
 ```
 #include <iostream>
 #include <easy_http/client.h>
+#include <easy_http/response.h>
 
 int main(int argn, char* argc[]) {
-	Client c("http://headers.jsontest.com");
+	Client c("http://postman-echo.com/");
 	try {
-		auto req = c.Get("/",
+		auto req = c.Post("/post",
 			[](const Response& res) {
 				std::cout << "response[" << res.GetStatusCode() << "]: " << res.GetContent() << std::endl;
 			})
-			.PushHeader("test_header", "test_value");
+			.PushHeader("test_header", "test_value")
+			.PushParam("test_query", "test_value");
 		std::cout << "calling: " << req.FullUrl() << std::endl;
-		c.SendRequest(req);
+			req.Send();
 	}
 	catch (const std::exception& e) {
 		std::cout << "request failed: " << e.what() << std::endl;
