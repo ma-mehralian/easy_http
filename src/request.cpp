@@ -47,10 +47,13 @@ Request& Request::PushParam(const std::string& key, const std::string& value) {
 
 Request& Request::PushParam(const ParamList& params) {
 	string params_str = "";
-	for (auto& p : params)
-		params_str += (!params_str.empty() ? "&" : "") +
-		string(evhttp_uriencode(p.first.c_str(), p.first.size(), 0)) + "=" +
-			string(evhttp_uriencode(p.second.c_str(), p.second.size(), 0));
+	for (auto& p : params) {
+		auto k = evhttp_uriencode(p.first.c_str(), p.first.size(), 0);
+		auto v = evhttp_uriencode(p.second.c_str(), p.second.size(), 0);
+		params_str += (!params_str.empty() ? "&" : "") + string(k) + "=" + string(v);
+		delete k;
+		delete v;
+	}
 	evhttp_uri_set_query(e_uri_.get(), params_str.c_str());
 	return *this;
 }

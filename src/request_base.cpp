@@ -498,6 +498,7 @@ void RequestBase::SendAsync(struct evhttp_connection* e_con, RequestBase::Reques
 void RequestBase::Send(struct evhttp_connection* e_con, RequestBase::RequestMethod method) {
     SendAsync(e_con, method);
     int r = event_base_dispatch(evhttp_connection_get_base(e_con));
+    evhttp_connection_free(e_con);
     e_con = NULL;
 }
 #pragma endregion
