@@ -1,8 +1,16 @@
-cmake_minimum_required(VERSION 3.11)
+set(EXAMPLE_NAME server_controller)
+add_executable(${EXAMPLE_NAME} main.cpp)
+target_include_directories(	
+	${EXAMPLE_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_directories(	
+	${EXAMPLE_NAME} PUBLIC ${CMAKE_BINARY_DIR})
+target_link_libraries(	
+	${EXAMPLE_NAME} ${PROJECT_NAME})
 
-add_executable(server_controller main.cpp)
+if (MSVC AND USE_MLD)
+    target_compile_definitions(${EXAMPLE_NAME} PUBLIC USE_MLD)
+	find_package(vld REQUIRED)
+	target_link_libraries(${EXAMPLE_NAME} vld)
+endif()
 
-target_include_directories(server_controller PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_link_directories(server_controller PUBLIC ${CMAKE_BINARY_DIR})
-target_link_libraries(server_controller ${PROJECT_NAME})
-set_target_properties(server_controller PROPERTIES FOLDER "examples" )
+set_target_properties(${EXAMPLE_NAME} PROPERTIES FOLDER "examples" )

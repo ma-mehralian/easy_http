@@ -1,6 +1,9 @@
 #include <iostream>
 #include <easy_http/client.h>
 #include <easy_http/response.h>
+#ifdef USE_MLD
+#include <vld.h>
+#endif
 
 int main(int argn, char* argc[]) {
 	Client c("http://localhost:4313/");

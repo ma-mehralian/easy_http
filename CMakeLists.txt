@@ -6,6 +6,7 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(USE_SPDLOG   "set ON to use spdlog" OFF)
 option(USE_JSON     "set ON to use nlohman json for json responses" OFF)
+option(USE_MLD      "set ON to use memory leak detector" OFF)
 
 set(PROJECT_MAJOR_VERSION 1)
 set(PROJECT_MINOR_VERSION 0)
@@ -14,6 +15,9 @@ set(PROJECT_VERSION
     ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
 
 find_package(Libevent REQUIRED)
+if (MSVC AND USE_MLD)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+endif()
 
 set(PROJECT_HEADERS 
     include/${PROJECT_NAME}/server.h

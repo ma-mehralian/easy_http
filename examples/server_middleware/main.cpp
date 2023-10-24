@@ -1,5 +1,8 @@
 #include <iostream>
 #include <easy_http/server.h>
+#ifdef USE_MLD
+#include <vld.h>
+#endif
 
 using namespace std;
 
