@@ -39,10 +39,9 @@ public:
 
 	/*!
 	 * call in this way:
-	 * RegisterController(std::move(crt_ptr));
-	 * RegisterController(std::make_unique<WebController>("/url/"));
+	 * RegisterController(std::make_shared<WebController>("/url/"));
 	 */
-	void RegisterController(std::unique_ptr<Controller> c);
+	void RegisterController(std::shared_ptr<Controller> c);
 
 #ifdef USE_SPDLOG
 	//! set spdlog output
@@ -53,7 +52,7 @@ protected:
 	//! Http server event handler
 	virtual Response RequestHandler(const Request& request);
 
-	std::vector<std::unique_ptr<Controller>> controllers_;
+	std::vector<std::shared_ptr<Controller>> controllers_;
 #ifdef USE_SPDLOG
 	std::shared_ptr<spdlog::logger> logger_;
 #endif //USE_SPDLOG

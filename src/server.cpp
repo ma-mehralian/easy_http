@@ -213,7 +213,7 @@ Route& Server::Delete(std::string url, RequestBase::RequestHandler handler) {
     return routes_.back();
 }
 
-void Server::RegisterController(std::unique_ptr<Controller> c) {
+void Server::RegisterController(std::shared_ptr<Controller> c) {
     controllers_.push_back(std::move(c));
 }
 
