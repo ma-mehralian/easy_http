@@ -20,6 +20,8 @@ public:
 	// check if the request will match with one of the controller routes
 	bool IsMatch(const Request& request) const;
 
+	std::string GetUrlPrefix() { return url_prefix_; }
+
 protected:
 	//! Add new Get route
 	template<class Derived>
