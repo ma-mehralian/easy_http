@@ -8,7 +8,10 @@
 
 class RequestBase {
 public:
+#pragma push_macro("DELETE")
+#undef DELETE
 	enum class RequestMethod { GET, POST, HEAD, PUT, DELETE, OPTIONS, TRACE, CONNECT, PATCH };
+#pragma pop_macro("DELETE")
 	typedef std::map<std::string, std::string> ParamList;
 	typedef std::function<void(const RequestBase&)> Handler;
 	typedef std::function<void(const class Response&)> ResponseHandler;
