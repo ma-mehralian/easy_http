@@ -43,6 +43,9 @@ public:
 	 */
 	void RegisterController(std::shared_ptr<Controller> c);
 
+	//! Get controller by prefix
+	std::shared_ptr<Controller> GetController(std::string url_prefix);
+
 #ifdef USE_SPDLOG
 	//! set spdlog output
 	void SetLogger(std::shared_ptr<spdlog::logger> logger);

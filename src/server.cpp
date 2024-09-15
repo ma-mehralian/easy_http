@@ -217,6 +217,12 @@ void Server::RegisterController(std::shared_ptr<Controller> c) {
     controllers_.push_back(std::move(c));
 }
 
+std::shared_ptr<Controller> Server::GetController(std::string url_prefix) {
+    for (auto& c : controllers_)
+        if (c->GetUrlPrefix() == url_prefix)
+			return c;
+}
+
 #ifdef USE_SPDLOG
 void Server::SetLogger(std::shared_ptr<spdlog::logger> logger) {
     logger_ = logger;
