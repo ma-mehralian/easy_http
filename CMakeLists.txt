@@ -14,7 +14,23 @@ set(PROJECT_PATCH_VERSION 0)
 set(PROJECT_VERSION
     ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
 
-find_package(Libevent REQUIRED)
+#--- add libevent
+if(DEFINED Libevent_DIR)
+    # add -DLibevent_DIR=path/to/cmake/libevent
+    find_package(Libevent REQUIRED)
+else()
+    find_package(PkgConfig) 
+    pkg_search_module(EVENT libevent)
+    if(EVENT_FOUND)
+        add_library(libevent::extra SHARED IMPORTED)
+        set_target_properties(libevent::extra PROPERTIES
+            IMPORTED_IMPLIB ${EVENT_LIBRARIES}
+            IMPORTED_LOCATION ${EVENT_LIBRARIES}
+            INTERFACE_INCLUDE_DIRECTORIES ${EVENT_INCLUDE_DIRS}
+        )
+    endif()
+endif()
+
 if (MSVC AND USE_MLD)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 endif()
