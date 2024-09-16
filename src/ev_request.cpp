@@ -89,6 +89,32 @@ EvRequest::EvRequest(evhttp_request* request)
     evhttp_request_set_on_complete_cb(e_request_, EvRequest::OnReplyComplete, this);
 }
 
+void error_cb(evhttp_request_error err_code, void* request_ptr) {
+    switch (err_code)
+    {
+    case EVREQ_HTTP_TIMEOUT:
+        throw runtime_error("EvRequest timeout");
+        break;
+    case EVREQ_HTTP_EOF:
+        throw runtime_error("EvRequest EOF");
+        break;
+    case EVREQ_HTTP_INVALID_HEADER:
+        throw runtime_error("EvRequest invalid header");
+        break;
+    case EVREQ_HTTP_BUFFER_ERROR:
+        throw runtime_error("EvRequest buffer error");
+        break;
+    case EVREQ_HTTP_REQUEST_CANCEL:
+        throw runtime_error("EvRequest cancel");
+        break;
+    case EVREQ_HTTP_DATA_TOO_LONG:
+        throw runtime_error("EvRequest data too long");
+        break;
+    default:
+        break;
+    }
+}
+
 EvRequest::EvRequest(std::string url, Handler handler, bool is_chunked)
     :type_(RequestType::REQUEST), response_handler_(handler), is_chunked_(is_chunked), request_complete_(false)
 {
@@ -96,7 +122,7 @@ EvRequest::EvRequest(std::string url, Handler handler, bool is_chunked)
     e_uri_ = evhttp_uri_parse(url.c_str());
     if (is_chunked_)
         evhttp_request_set_chunked_cb(e_request_, EvRequest::ResponseChunkedHandler);
-    evhttp_request_set_error_cb(e_request_, EvRequest::ResponseErrorHandler);
+    evhttp_request_set_error_cb(e_request_, error_cb);
 }
 
 EvRequest::~EvRequest() {
@@ -470,31 +496,4 @@ void EvRequest::ResponseChunkedHandler(evhttp_request* request, void* request_pt
     auto req = *static_cast<EvRequest**>(request_ptr);
     req->response_handler_(make_unique<EvRequest>(request));
 }
-
-void EvRequest::ResponseErrorHandler(enum evhttp_request_error err_code, void* request_ptr) {
-    switch (err_code)
-    {
-    case EVREQ_HTTP_TIMEOUT:
-        throw runtime_error("EvRequest timeout");
-        break;
-    case EVREQ_HTTP_EOF:
-        throw runtime_error("EvRequest EOF");
-        break;
-    case EVREQ_HTTP_INVALID_HEADER:
-        throw runtime_error("EvRequest invalid header");
-        break;
-    case EVREQ_HTTP_BUFFER_ERROR:
-        throw runtime_error("EvRequest buffer error");
-        break;
-    case EVREQ_HTTP_REQUEST_CANCEL:
-        throw runtime_error("EvRequest cancel");
-        break;
-    case EVREQ_HTTP_DATA_TOO_LONG:
-        throw runtime_error("EvRequest data too long");
-        break;
-    default:
-        break;
-    }
-}
-
 #pragma endregion

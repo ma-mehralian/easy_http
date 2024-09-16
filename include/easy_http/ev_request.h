@@ -132,7 +132,6 @@ private:
 
 	static void ResponseChunkedHandler(evhttp_request* request, void* request_ptr);
 
-	static void ResponseErrorHandler(enum evhttp_request_error err_code, void* request_ptr);
 };
 
 #endif // !_HTTP_EV_REQUEST_H_
