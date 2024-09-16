@@ -201,7 +201,7 @@ class RequestBaseAbstract: public RequestBase {
 public:
 	using RequestBase::RequestBase;
 
-	RequestBaseAbstract<T>(const RequestBase& req) : RequestBase(req) {}
+	RequestBaseAbstract(const RequestBase& req) : RequestBase(req) {}
 
 	T& SetContent(const std::string& content) {
 		return *static_cast<T*>(&RequestBase::SetContent(content));

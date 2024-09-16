@@ -492,7 +492,7 @@ void RequestBase::SendAsync(struct evhttp_connection* e_con, RequestBase::Reques
 #pragma pop_macro("DELETE")
     cb_container_->e_con_ = e_con;
     if (evhttp_make_request(e_con, e_request_, m, FullUrl().c_str()) == -1)
-        throw std::exception("Request failed!");
+        throw runtime_error("Request failed!");
 }
 
 void RequestBase::Send(struct evhttp_connection* e_con, RequestBase::RequestMethod method) {

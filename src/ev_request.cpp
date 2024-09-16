@@ -466,7 +466,7 @@ void EvRequest::SendAsync(struct evhttp_connection* e_con, EvRequest::RequestMet
     }
 #pragma pop_macro("DELETE")
     if (evhttp_make_request(e_con, e_request_, m, FullUrl().c_str()) == -1)
-        throw std::exception("Request failed!");
+        throw runtime_error("Request failed!");
 }
 
 void EvRequest::Send(struct evhttp_connection* e_con, EvRequest::RequestMethod method) {
