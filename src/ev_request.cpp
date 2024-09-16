@@ -205,6 +205,7 @@ const EvRequest::RequestMethod EvRequest::Method() const {
     case EVHTTP_REQ_TRACE:      return RequestMethod::TRACE; break;
     case EVHTTP_REQ_CONNECT:    return RequestMethod::CONNECT; break;
     case EVHTTP_REQ_PATCH:      return RequestMethod::PATCH; break;
+    default:                    return RequestMethod::GET;
     }
 #pragma pop_macro("DELETE")
 }
@@ -396,10 +397,10 @@ std::string EvRequest::ToLower(const std::string& str) const {
 }
 
 struct chunk_req_state {
-    evhttp_request* req;
-    event* timer;
-    std::function<bool(std::string&)> get_chunk;
-    int i;
+	evhttp_request* req = nullptr;
+    event* timer = nullptr;
+    std::function<bool(std::string&)> get_chunk = nullptr;
+	int i = 0;
 };
 
 static void

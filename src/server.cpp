@@ -221,6 +221,7 @@ std::shared_ptr<Controller> Server::GetController(std::string url_prefix) {
     for (auto& c : controllers_)
         if (c->GetUrlPrefix() == url_prefix)
 			return c;
+    return nullptr;
 }
 
 #ifdef USE_SPDLOG

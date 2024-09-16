@@ -268,6 +268,7 @@ const RequestBase::RequestMethod RequestBase::Method() const {
     case EVHTTP_REQ_TRACE:      return RequestMethod::TRACE; break;
     case EVHTTP_REQ_CONNECT:    return RequestMethod::CONNECT; break;
     case EVHTTP_REQ_PATCH:      return RequestMethod::PATCH; break;
+    default:                    return RequestMethod::GET; break;
     }
 #pragma pop_macro("DELETE")
 }
