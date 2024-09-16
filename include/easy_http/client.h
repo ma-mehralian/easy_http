@@ -1,6 +1,7 @@
 #ifndef _HTTP_CLIENT_H_
 #define _HTTP_CLIENT_H_
 
+#include <stdint.h>
 #include <string>
 #include <easy_http/request.h>
 

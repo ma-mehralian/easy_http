@@ -1,6 +1,7 @@
 #ifndef _HTTP_SERVER_H_
 #define _HTTP_SERVER_H_
 
+#include <stdint.h>
 #include <easy_http/route.h>
 #include <easy_http/controller.h>
 #include <functional>
