@@ -120,6 +120,8 @@ private:
 	bool request_complete_;
 	bool is_chunked_ = false;
 	std::function<bool(std::string&)> chunk_callback_ = nullptr;
+	static void Chunk_cb(struct evhttp_connection* con, void* arg);
+
 	static const std::map<std::string, std::string> content_types_;
 
 

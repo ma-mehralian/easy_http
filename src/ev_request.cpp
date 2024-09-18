@@ -396,37 +396,18 @@ std::string EvRequest::ToLower(const std::string& str) const {
     return r;
 }
 
-struct chunk_req_state {
-	evhttp_request* req = nullptr;
-    event* timer = nullptr;
-    std::function<bool(std::string&)> get_chunk = nullptr;
-	int i = 0;
-};
 
-static void
-schedule_trickle(struct chunk_req_state* state, int ms) {
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = ms * 30;
-    evtimer_add(state->timer, &tv);
-}
-
-static void
-http_chunked_trickle_cb(evutil_socket_t fd, short events, void* arg) {
-    auto state = static_cast<chunk_req_state*>(arg);
+void EvRequest::Chunk_cb(struct evhttp_connection* con, void* arg) {
+    auto req = static_cast<EvRequest*>(arg);
     string chunk;
-    if (state->get_chunk(chunk) && evhttp_request_get_connection(state->req)) {
-        state->i++;
-        struct evbuffer* evb = evbuffer_new();
-        evbuffer_add(evb, chunk.c_str(), chunk.length());
-        evhttp_send_reply_chunk(state->req, evb);
-        evbuffer_free(evb);
-        schedule_trickle(state, 1000);
+    if (req->chunk_callback_(chunk) && con) {
+        struct evbuffer* buf = evbuffer_new();
+        evbuffer_add(buf, chunk.c_str(), chunk.length());
+        evhttp_send_reply_chunk_with_cb(req->e_request_, buf, &EvRequest::Chunk_cb, arg);
+        evbuffer_free(buf);
     }
     else {
-        evhttp_send_reply_end(state->req);
-        event_free(state->timer);
-        free(state);
+        evhttp_send_reply_end(req->e_request_);
     }
 }
 
@@ -437,14 +418,10 @@ void EvRequest::Reply(int status_code) {
     if (!is_chunked_)
         evhttp_send_reply(e_request_, status_code, "ok", evhttp_request_get_output_buffer(e_request_));
     else {
-        //https://gist.github.com/rgl/291085
-        auto state = new chunk_req_state();
-        state->req = e_request_;
-        state->timer = evtimer_new(evhttp_connection_get_base(evhttp_request_get_connection(e_request_)),
-            http_chunked_trickle_cb, state);
-        state->get_chunk = chunk_callback_;
         evhttp_send_reply_start(e_request_, status_code, "OK");
-        schedule_trickle(state, 0);
+        struct evbuffer* buf = evbuffer_new();
+        evhttp_send_reply_chunk_with_cb(e_request_, buf, &EvRequest::Chunk_cb, this);
+        evbuffer_free(buf);
     }
 }
 
