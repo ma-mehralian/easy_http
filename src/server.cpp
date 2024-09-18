@@ -185,6 +185,7 @@ int Server::Stop() {
 		evhttp_free(e_http_server_);
 	if (e_base_)
 		event_base_free(e_base_);
+    is_started_ = false;
 	return 0;
 }
 
