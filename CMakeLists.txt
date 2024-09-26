@@ -19,14 +19,24 @@ if(DEFINED Libevent_DIR)
     # add -DLibevent_DIR=path/to/cmake/libevent
     find_package(Libevent REQUIRED)
 else()
+    #find_package(OpenSSL REQUIRED)
     find_package(PkgConfig) 
-    pkg_search_module(EVENT libevent)
-    if(EVENT_FOUND)
+    pkg_search_module(EVENT_EXTRA REQUIRED libevent_extra)
+    if(EVENT_EXTRA_FOUND)
         add_library(libevent::extra SHARED IMPORTED)
         set_target_properties(libevent::extra PROPERTIES
-            IMPORTED_IMPLIB ${EVENT_LIBRARIES}
-            IMPORTED_LOCATION ${EVENT_LIBRARIES}
-            INTERFACE_INCLUDE_DIRECTORIES ${EVENT_INCLUDE_DIRS}
+            IMPORTED_IMPLIB ${EVENT_EXTRA_LIBRARIES}
+            IMPORTED_LOCATION ${EVENT_EXTRA_LIBRARIES}
+            INTERFACE_INCLUDE_DIRECTORIES ${EVENT_EXTRA_INCLUDE_DIRS}
+        )
+    endif()
+    pkg_search_module(EVENT_PTHREADS REQUIRED libevent_pthreads)
+    if(EVENT_PTHREADS_FOUND)
+        add_library(libevent::pthreads SHARED IMPORTED)
+        set_target_properties(libevent::pthreads PROPERTIES
+            IMPORTED_IMPLIB ${EVENT_PTHREADS_LIBRARIES}
+            IMPORTED_LOCATION ${EVENT_PTHREADS_LIBRARIES}
+            INTERFACE_INCLUDE_DIRECTORIES ${EVENT_PTHREADS_INCLUDE_DIRS}
         )
     endif()
 endif()
@@ -65,6 +75,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER "${PROJECT_HEADERS}")
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} PRIVATE libevent::extra)
+if(UNIX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE libevent::pthreads)
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
 endif()

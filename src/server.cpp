@@ -1,6 +1,7 @@
 #include <easy_http/server.h>
 #include <signal.h>
 #include <event2/event.h>
+#include <event2/thread.h>
 #include <event2/http.h>
 #include <event2/keyvalq_struct.h>
 #include <event2/buffer.h>
@@ -124,10 +125,17 @@ int Server::Start() {
     if (iocp) {
 #ifdef EVTHREAD_USE_WINDOWS_THREADS_IMPLEMENTED
         evthread_use_windows_threads();
-        event_config_set_num_cpus_hint(cfg, 8);
+        event_config_set_num_cpus_hint(e_cfg, 8);
 #endif
         event_config_set_flag(e_cfg, EVENT_BASE_FLAG_STARTUP_IOCP);
     }
+#else
+#ifdef EVTHREAD_USE_PTHREADS_IMPLEMENTED
+    if (evthread_use_pthreads() != 0) {
+        fprintf(stderr, "Failed to initialize pthreads support!\n");
+        return 1;
+    }
+#endif
 #endif
 
     e_base_ = event_base_new_with_config(e_cfg);
