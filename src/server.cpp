@@ -34,6 +34,11 @@ Server::Server(const std::string& ip, int port) :
     logger_ = spdlog::create<spdlog::sinks::null_sink_st>("server");
 #endif //USE_SPDLOG
     //event_enable_debug_logging(EVENT_DBG_ALL);
+    
+    // activate debug by environment variable
+    if (getenv("EVENT_DEBUG_LOGGING_ALL"))
+        event_enable_debug_logging(EVENT_DBG_ALL);
+
 }
 
 Server::~Server() {
